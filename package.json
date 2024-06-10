@@ -14,12 +14,21 @@
     "@mui/icons-material": "^5.15.19",
     "@mui/material": "^5.15.19",
     "@mui/styled-engine-sc": "^6.0.0-alpha.18",
+    "@radix-ui/react-avatar": "^1.0.4",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-popover": "^1.0.7",
+    "@radix-ui/react-separator": "^1.0.3",
+    "class-variance-authority": "^0.7.0",
     "firebase": "^10.12.2",
+    "lucide-react": "^0.390.0",
     "next": "14.2.3",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.51.5",
-    "styled-components": "^6.1.11"
+    "styled-components": "^6.1.11",
+    "tailwind-merge": "^2.3.0",
+    "usehooks-ts": "^3.1.0",
+    "vaul": "^0.9.1"
   },
   "devDependencies": {
     "@types/node": "^20",

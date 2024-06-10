@@ -14,21 +14,20 @@ import { getCurrentUser } from "./user";
 export const db = getFirestore();
 
 //add event by uid
-export const addevent = async (eventName: string) => {
+export const addevent = async (eventName: string, organizer: string) => {
   try {
-    const uid = getCurrentUser();
-    console.log(uid);
-    if (uid) {
+    const currentUser = getCurrentUser();
+    if (currentUser) {
+      const uid = currentUser.uid;
       await addDoc(collection(db, `users/${uid}/events`), {
         name: eventName,
         createdAt: new Date(),
+        organizer: organizer,
       });
-      console.log("Event berhasil ditambahkan!");
     } else {
       throw new Error("Pengguna tidak ditemukan.");
     }
   } catch (error) {
-    console.error("Gagal menambahkan event:", error);
     throw new Error("Gagal menambahkan event.");
   }
 };
@@ -36,14 +35,18 @@ export const addevent = async (eventName: string) => {
 //get event by uid
 export const getEvent = async () => {
   try {
-    const uid = getCurrentUser();
-    const eventList: string[] = [];
+    const currentUser = getCurrentUser();
+    const eventList: { name: string; createdAt: Date; organizer: string }[] =
+      [];
 
-    if (uid) {
+    if (currentUser) {
+      const uid = currentUser.uid;
       const q = query(collection(db, `users/${uid}/events`));
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) => {
-        eventList.push(doc.data().name);
+        const eventData = doc.data();
+        const { name, createdAt, organizer } = eventData;
+        eventList.push({ name, createdAt: createdAt.toDate(), organizer });
       });
     } else {
       throw new Error("Pengguna tidak ditemukan.");
@@ -51,7 +54,6 @@ export const getEvent = async () => {
 
     return eventList;
   } catch (error) {
-    console.error("Gagal mendapatkan event:", error);
     throw new Error("Gagal mendapatkan event.");
   }
 };

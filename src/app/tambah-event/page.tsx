@@ -1,38 +1,18 @@
 "use client";
-import React, { useState } from "react";
-import { addevent } from "@/utils/event";
+import React from "react";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import FormAddEvent from "@/components/event/FormAddEvent";
+import { Sidebar } from "@/components/sidebar/Sidebar";
 
-const FormAddItem = () => {
-  const [eventName, setEventName] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Nama event:", eventName);
-    try {
-      await addevent(eventName);
-      alert("Event berhasil ditambahkan!");
-      setEventName("");
-    } catch (error) {
-      alert("Gagal menambahkan event. Silakan coba lagi.");
-    }
-  };
-
+const page = () => {
   return (
-    <section>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="eventName">Nama event</label>
-          <input
-            type="text"
-            id="eventName"
-            value={eventName}
-            onChange={(e) => setEventName(e.target.value)}
-          />
-        </div>
-        <button type="submit">Tambah Event</button>
-      </form>
-    </section>
+    <ProtectedRoute>
+      <Sidebar />
+      <div className="mx-5 mt-16 sm:ml-[300px] sm:mt-3">
+        <FormAddEvent />
+      </div>
+    </ProtectedRoute>
   );
 };
 
-export default FormAddItem;
+export default page;

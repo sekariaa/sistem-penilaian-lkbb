@@ -12,20 +12,16 @@ export const SignIn = async (email: string, password: string) => {
   try {
     await signInWithEmailAndPassword(FirebaseAuth, email, password);
   } catch (error: any) {
-    console.log("Firebase Error:", error.code, error.message);
     throw error;
   }
 };
 
 //mendapatkan error signin
 export const GetSignInErrorMessage = (code: any) => {
-  console.log(code);
   switch (code) {
     case "auth/user-not-found":
-      console.log(code);
       return "Email tidak terdaftar";
     case "auth/wrong-password":
-      console.log(code);
       return "Password salah";
     default:
       return "Email atau password salah";
@@ -38,10 +34,14 @@ export const SignOut = async () => {
 };
 
 //mendapatkan user yang sign in
-export const getCurrentUser = () => {
+export const getCurrentUser = (): {
+  uid: string;
+  email: string | null;
+} | null => {
   const user = FirebaseAuth.currentUser;
   if (user !== null) {
-    return user.uid;
+    const { uid, email } = user;
+    return { uid, email };
   }
   return null;
 };
