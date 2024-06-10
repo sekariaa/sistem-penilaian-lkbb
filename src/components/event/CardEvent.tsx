@@ -6,11 +6,14 @@ import CardContent from "@mui/material/CardContent";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { Tooltip } from "@mui/material";
+import Link from "next/link";
 
 interface Event {
+  id: string;
   name: string;
   createdAt: Date;
   organizer: string;
+  level: string;
 }
 
 const CardEvent = ({ event }: { event: Event }) => (
@@ -22,9 +25,8 @@ const CardEvent = ({ event }: { event: Event }) => (
         </Typography>
         <Tooltip title={event.name}>
           <Typography
-            variant="h5"
+            variant="h6"
             component="div"
-            gutterBottom
             sx={{
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -38,6 +40,21 @@ const CardEvent = ({ event }: { event: Event }) => (
         </Tooltip>
         <Tooltip title={event.organizer}>
           <Typography
+            sx={{
+              mb: 1.5,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              display: "-webkit-box",
+              WebkitBoxOrient: "vertical",
+              WebkitLineClamp: 1,
+            }}
+            color="text.secondary"
+          >
+            {event.organizer}
+          </Typography>
+        </Tooltip>
+        <Tooltip title={event.level}>
+          <Typography
             variant="body2"
             sx={{
               overflow: "hidden",
@@ -47,12 +64,14 @@ const CardEvent = ({ event }: { event: Event }) => (
               WebkitLineClamp: 1,
             }}
           >
-            {event.organizer}
+            {event.level}
           </Typography>
         </Tooltip>
       </CardContent>
       <CardActions>
-        <Button size="small">Rekap Nilai</Button>
+        <Link href={`event/rekap-nilai/${event.id}`} passHref>
+          <Button size="small">Rekap Nilai</Button>
+        </Link>
       </CardActions>
     </Card>
   </Box>

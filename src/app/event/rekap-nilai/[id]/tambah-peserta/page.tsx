@@ -2,14 +2,14 @@
 import React from "react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { Sidebar } from "@/components/sidebar/Sidebar";
-import Test from "@/components/Test";
+import TambahPeserta from "@/components/rekap-nilai/TambahPeserta";
 
 const page = () => {
   return (
     <ProtectedRoute>
       <Sidebar />
       <div className="mx-5 mt-16 sm:ml-[300px] sm:mt-3">
-        <Test />
+        <TambahPeserta />
       </div>
     </ProtectedRoute>
   );

@@ -1,21 +1,27 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import CardEvent from "./CardEvent";
-import { getEvent } from "../../utils/event";
+import { getEvents } from "../../utils/event";
 import { Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import CircularProgress from "@mui/material/CircularProgress";
 
 const Event = () => {
   const [events, setEvents] = useState<
-    { name: string; createdAt: Date; organizer: string }[]
+    {
+      id: string;
+      name: string;
+      createdAt: Date;
+      organizer: string;
+      level: string;
+    }[]
   >([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const eventList = await getEvent();
+        const eventList = await getEvents();
         setLoading(false);
         setEvents(eventList);
       } catch (error) {
@@ -28,8 +34,8 @@ const Event = () => {
   }, []);
   return (
     <section className="mx-auto max-w-[1640px]">
-      <h1 className="text-center text-xl font-bold mb-3">Daftar Event</h1>
-      <div className="flex justify-start mb-3">
+      <h1 className="text-center text-3xl font-bold mb-3">Daftar Event</h1>
+      <div className="mb-3">
         <Link href="tambah-event" passHref>
           <Button
             variant="contained"
@@ -45,9 +51,9 @@ const Event = () => {
         {loading ? (
           <CircularProgress style={{ color: "#000000" }} />
         ) : events.length > 0 ? (
-          <div className="gap-x-10 gap-y-8 grid grid-cols-1 xl:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 ">
-            {events.map((event, index) => (
-              <CardEvent key={index} event={event} />
+          <div className="gap-x-5 gap-y-8 grid grid-cols-1 xl:w-full xl:grid-cols-6 md:grid-cols-4 sm:grid-cols-2">
+            {events.map((event) => (
+              <CardEvent key={event.id} event={event} />
             ))}
           </div>
         ) : (

@@ -7,8 +7,6 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import CircularProgress from "@mui/material/CircularProgress";
-// import Snackbar from "@mui/material/Snackbar";
-// import Alert from "@mui/material/Alert";
 import AlertComponent from "../../components/AlertComponent";
 
 type FormValues = {
