@@ -1,5 +1,4 @@
 import * as React from "react";
-import { alpha } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -10,8 +9,11 @@ import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import Paper from "@mui/material/Paper";
-import Checkbox from "@mui/material/Checkbox";
 import { visuallyHidden } from "@mui/utils";
+import { useParams } from "next/navigation";
+import { getParticipants } from "@/utils/participant";
+import LinearProgress from "@mui/material/LinearProgress";
+import Button from "./ButtonComponent";
 
 interface Data {
   noUrut: string;
@@ -26,12 +28,6 @@ function createData(noUrut: string, namaTim: string, lainnya: any): Data {
     lainnya,
   };
 }
-
-const rows = [
-  createData("1", "Cupcake", "HAHIHU"),
-  createData("2", "Donut", "HAHIHU"),
-  createData("3", "Eclair", "HAHIHU"),
-];
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
   if (b[orderBy] < a[orderBy]) {
@@ -126,6 +122,7 @@ function EnhancedTableHead(props: EnhancedTableProps) {
             align={headCell.numeric ? "right" : "center"}
             padding={headCell.disablePadding ? "none" : "normal"}
             sortDirection={orderBy === headCell.id ? order : false}
+            sx={{ fontWeight: "bold" }}
           >
             <TableSortLabel
               active={orderBy === headCell.id}
@@ -151,6 +148,29 @@ export default function EnhancedTable() {
   const [orderBy, setOrderBy] = React.useState<keyof Data>("noUrut");
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [participants, setParticipants] = React.useState<Data[]>([]);
+  const [loading, setLoading] = React.useState<boolean>(true);
+  const params = useParams();
+  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getParticipants(id);
+        setParticipants(
+          data.map((participant) =>
+            createData(participant.noUrut, participant.namaTim, "Lainnya")
+          )
+        );
+        setLoading(false);
+      } catch (error) {
+        setLoading(false);
+        console.error("Failed to fetch participants:", error);
+      }
+    };
+
+    fetchData();
+  }, [id]);
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
@@ -175,53 +195,60 @@ export default function EnhancedTable() {
     setPage(0);
   };
 
-  // Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows =
-    page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
-
   const visibleRows = React.useMemo(
     () =>
-      stableSort(rows, getComparator(order, orderBy)).slice(
+      stableSort(participants, getComparator(order, orderBy)).slice(
         page * rowsPerPage,
         page * rowsPerPage + rowsPerPage
       ),
-    [order, orderBy, page, rowsPerPage]
+    [order, orderBy, page, rowsPerPage, participants]
   );
 
   return (
-    <Box sx={{ width: "100%" }}>
+    <Box sx={{ width: "100%", boxShadow: 3 }}>
+      {loading && <LinearProgress color="inherit" />}
       <Paper sx={{ width: "100%", mb: 2 }}>
         <TableContainer>
-          <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
+          <Table
+            sx={{ minWidth: 750 }}
+            aria-labelledby="tableTitle"
+            size="small"
+          >
             <EnhancedTableHead
               order={order}
               orderBy={orderBy}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
+              rowCount={participants.length}
             />
             <TableBody>
-              {visibleRows.map((row) => {
-                return (
-                  <TableRow key={row.noUrut}>
-                    <TableCell align="center" className="bg-green-300 w-36">
-                      {row.noUrut}
-                    </TableCell>
-                    <TableCell align="center" className="bg-blue-300 w-96">
-                      {row.namaTim}
-                    </TableCell>
-                    <TableCell align="center" className="bg-yellow-300">
-                      {row.lainnya}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
+              {!loading && participants.length > 0
+                ? visibleRows.map((row) => (
+                    <TableRow key={row.noUrut}>
+                      <TableCell align="center" className="bg-green-300 w-36">
+                        {row.noUrut}
+                      </TableCell>
+                      <TableCell align="center" className="bg-blue-300 w-56">
+                        {row.namaTim}
+                      </TableCell>
+                      <TableCell align="center" className="bg-yellow-300">
+                        <Button intent="Hapus"></Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                : !loading && (
+                    <TableRow>
+                      <TableCell colSpan={3} align="center">
+                        <p className="text-gray-400">Tidak Ada Data</p>
+                      </TableCell>
+                    </TableRow>
+                  )}
             </TableBody>
           </Table>
         </TableContainer>
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
-          count={rows.length}
+          count={participants.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handleChangePage}

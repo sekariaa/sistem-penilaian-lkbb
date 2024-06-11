@@ -69,8 +69,8 @@ const CardEvent = ({ event }: { event: Event }) => (
         </Tooltip>
       </CardContent>
       <CardActions>
-        <Link href={`event/rekap-nilai/${event.id}`} passHref>
-          <Button size="small">Rekap Nilai</Button>
+        <Link href={`event/rekap-juri/${event.id}`} passHref>
+          <Button size="small">Rekap Juri</Button>
         </Link>
       </CardActions>
     </Card>

@@ -5,11 +5,9 @@ import CircularProgress from "@mui/material/CircularProgress";
 import Link from "next/link";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { IconButton } from "@mui/material";
-import TableSchool from "./TablePeserta";
+import TableJuara from "./TableJuara";
 import { Button } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import { getParticipants } from "@/utils/participant";
+import DownloadIcon from "@mui/icons-material/Download";
 
 const RekapNilai = () => {
   const [event, setEvent] = useState<{
@@ -42,7 +40,7 @@ const RekapNilai = () => {
 
   return (
     <section className="mx-auto max-w-[1640px]">
-      <Link href="../" passHref>
+      <Link href="./" passHref>
         <IconButton style={{ color: "#000000" }}>
           <ArrowBackIosIcon />
         </IconButton>
@@ -56,10 +54,8 @@ const RekapNilai = () => {
         <p className="text-center">Event tidak ditemukan.</p>
       ) : (
         <div>
-          <h1 className="text-center text-3xl font-bold mb-3">
-            Daftar Peserta
-          </h1>
-          <div className="flex justify-between">
+          <h1 className="text-center text-3xl font-bold mb-3">Rekap Juara</h1>
+          <div className="flex flex-col md:flex-row justify-between">
             <div className="space-y-2 mb-3">
               <p>
                 <span className="font-bold">Nama Event: </span> {event.name}
@@ -73,31 +69,19 @@ const RekapNilai = () => {
                 {event.level}
               </p>
             </div>
-            <div className="flex gap-3">
-              <Link href={`/event/rekap-nilai/${id}/tambah-peserta`} passHref>
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  size="small"
-                  style={{ backgroundColor: "#000000", textTransform: "none" }}
-                >
-                  Tambah Peserta
-                </Button>
-              </Link>
-              <Link href={`/event/rekap-nilai/${id}/hasil-penilaian`} passHref>
-                <Button
-                  variant="contained"
-                  startIcon={<EmojiEventsIcon />}
-                  size="small"
-                  style={{ backgroundColor: "#000000", textTransform: "none" }}
-                >
-                  Hasil Penilaian
-                </Button>
-              </Link>
+            <div className="mb-3">
+              <Button
+                variant="contained"
+                startIcon={<DownloadIcon />}
+                size="small"
+                style={{ backgroundColor: "#000000", textTransform: "none" }}
+              >
+                Unduh Data
+              </Button>
             </div>
           </div>
 
-          <TableSchool />
+          <TableJuara />
         </div>
       )}
     </section>
