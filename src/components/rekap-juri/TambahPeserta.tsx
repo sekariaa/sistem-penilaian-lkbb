@@ -15,7 +15,7 @@ const TambahPeserta = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const params = useParams();
-  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const eventID = Array.isArray(params.eventID) ? params.eventID[0] : params.eventID;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +27,7 @@ const TambahPeserta = () => {
     console.log("nama sekolah:", namaTim);
     try {
       setIsLoading(true);
-      await addParticipant(id, noUrut, namaTim);
+      await addParticipant(eventID, noUrut, namaTim);
       setIsLoading(false);
       setSuccess("Peserta berhasil ditambahkan!");
       setNoUrut("");

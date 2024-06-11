@@ -12,22 +12,26 @@ import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 
 const RekapNilai = () => {
   const [event, setEvent] = useState<{
-    id: string;
+    eventID: string;
     name: string;
     organizer: string;
     level: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const params = useParams();
-  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const eventID = Array.isArray(params.eventID)
+    ? params.eventID[0]
+    : params.eventID;
 
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        if (id) {
-          const eventDetails = await getEvent(id);
+        if (eventID) {
+          const eventDetails = await getEvent(eventID);
           setEvent(eventDetails);
+          setLoading(false);
         } else {
+          setLoading(false);
           console.error("Event ID tidak ditemukan");
         }
       } catch (error) {
@@ -37,7 +41,7 @@ const RekapNilai = () => {
       }
     };
     fetchEvent();
-  }, [id]);
+  }, [eventID]);
 
   return (
     <section className="mx-auto max-w-[1640px]">
@@ -73,7 +77,10 @@ const RekapNilai = () => {
               </p>
             </div>
             <div className="flex gap-3 mb-3">
-              <Link href={`/event/rekap-juri/${id}/tambah-peserta`} passHref>
+              <Link
+                href={`/event/rekap-juri/${eventID}/tambah-peserta`}
+                passHref
+              >
                 <Button
                   variant="contained"
                   startIcon={<AddIcon />}
@@ -83,7 +90,7 @@ const RekapNilai = () => {
                   Tambah Peserta
                 </Button>
               </Link>
-              <Link href={`/event/rekap-juri/${id}/rekap-juara`} passHref>
+              <Link href={`/event/rekap-juri/${eventID}/rekap-juara`} passHref>
                 <Button
                   variant="contained"
                   startIcon={<EmojiEventsIcon />}

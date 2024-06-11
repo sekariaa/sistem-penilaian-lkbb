@@ -9,7 +9,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 const Event = () => {
   const [events, setEvents] = useState<
     {
-      id: string;
+      eventID: string;
       name: string;
       createdAt: Date;
       organizer: string;
@@ -53,7 +53,7 @@ const Event = () => {
         ) : events.length > 0 ? (
           <div className="gap-x-5 gap-y-8 grid grid-cols-1 xl:w-full xl:grid-cols-6 md:grid-cols-4 sm:grid-cols-2">
             {events.map((event) => (
-              <CardEvent key={event.id} event={event} />
+              <CardEvent key={event.eventID} event={event} />
             ))}
           </div>
         ) : (

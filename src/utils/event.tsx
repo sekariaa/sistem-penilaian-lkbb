@@ -42,7 +42,7 @@ export const getEvents = async () => {
   try {
     const currentUser = getCurrentUser();
     const eventList: {
-      id: string;
+      eventID: string;
       name: string;
       createdAt: Date;
       organizer: string;
@@ -57,7 +57,7 @@ export const getEvents = async () => {
         const eventData = doc.data();
         const { name, createdAt, organizer, level } = eventData;
         eventList.push({
-          id: doc.id,
+          eventID: doc.id,
           name,
           createdAt: createdAt.toDate(),
           organizer,
@@ -75,17 +75,17 @@ export const getEvents = async () => {
 };
 
 //get single event by uid dan id
-export const getEvent = async (eventId: string) => {
+export const getEvent = async (eventID: string) => {
   try {
     const currentUser = getCurrentUser();
     if (currentUser) {
       const uid = currentUser.uid;
-      const q = doc(db, `users/${uid}/events/${eventId}`);
+      const q = doc(db, `users/${uid}/events/${eventID}`);
       const docSnap = await getDoc(q);
       if (docSnap.exists()) {
         const eventData = docSnap.data();
         return {
-          id: docSnap.id,
+          eventID: docSnap.id,
           name: eventData.name,
           organizer: eventData.organizer,
           level: eventData.level,
@@ -100,7 +100,3 @@ export const getEvent = async (eventId: string) => {
     throw new Error("Gagal mendapatkan event.");
   }
 };
-
-
-
-

@@ -13,16 +13,24 @@ import { visuallyHidden } from "@mui/utils";
 import { useParams } from "next/navigation";
 import { getParticipants } from "@/utils/participant";
 import LinearProgress from "@mui/material/LinearProgress";
-import Button from "./ButtonComponent";
+import ButtonComponent from "./ButtonComponent";
+import Link from "next/link";
 
 interface Data {
+  pesertaID: string;
   noUrut: string;
   namaTim: string;
   lainnya: any;
 }
 
-function createData(noUrut: string, namaTim: string, lainnya: any): Data {
+function createData(
+  pesertaID: string,
+  noUrut: string,
+  namaTim: string,
+  lainnya: any
+): Data {
   return {
+    pesertaID,
     noUrut,
     namaTim,
     lainnya,
@@ -151,15 +159,22 @@ export default function EnhancedTable() {
   const [participants, setParticipants] = React.useState<Data[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
   const params = useParams();
-  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const eventID = Array.isArray(params.eventID)
+    ? params.eventID[0]
+    : params.eventID;
 
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getParticipants(id);
+        const data = await getParticipants(eventID);
         setParticipants(
           data.map((participant) =>
-            createData(participant.noUrut, participant.namaTim, "Lainnya")
+            createData(
+              participant.pesertaID,
+              participant.noUrut,
+              participant.namaTim,
+              "Lainnya"
+            )
           )
         );
         setLoading(false);
@@ -170,7 +185,7 @@ export default function EnhancedTable() {
     };
 
     fetchData();
-  }, [id]);
+  }, [eventID]);
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
@@ -228,10 +243,18 @@ export default function EnhancedTable() {
                         {row.noUrut}
                       </TableCell>
                       <TableCell align="center" className="bg-blue-300 w-56">
-                        {row.namaTim}
+                        {row.namaTim} <br />
                       </TableCell>
+                      {/* upload nilai */}
                       <TableCell align="center" className="bg-yellow-300">
-                        <Button intent="Hapus"></Button>
+                        <Link
+                          href={`/event/rekap-juri/${eventID}/upload-nilai/${row.pesertaID}`}
+                          passHref
+                        >
+                          <ButtonComponent intent="Upload Nilai"></ButtonComponent>
+                        </Link>
+                        {/* hapus data */}
+                        <ButtonComponent intent="Hapus"></ButtonComponent>
                       </TableCell>
                     </TableRow>
                   ))

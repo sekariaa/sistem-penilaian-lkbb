@@ -8,6 +8,7 @@ import {
   getDocs,
   addDoc,
   getDoc,
+  setDoc,
 } from "firebase/firestore";
 import { getCurrentUser } from "./user";
 
@@ -76,6 +77,7 @@ export const getParticipants = async (eventId: string) => {
   try {
     const currentUser = getCurrentUser();
     const participantList: {
+      pesertaID: string;
       noUrut: string;
       namaTim: string;
     }[] = [];
@@ -100,6 +102,7 @@ export const getParticipants = async (eventId: string) => {
       const participantData = doc.data();
       const { noUrut, namaTim } = participantData;
       participantList.push({
+        pesertaID: doc.id,
         noUrut: noUrut,
         namaTim: namaTim,
       });
@@ -139,7 +142,7 @@ export const getParticipant = async (
     const docSnap = await getDoc(q);
 
     if (!docSnap.exists()) {
-      throw new Error("Data peserta tidak ditemukan.");
+      throw new Error("Event tidak ditemukan.");
     }
 
     const participantData = docSnap.data();
@@ -149,6 +152,7 @@ export const getParticipant = async (
     }
 
     return {
+      pesertaID: docSnap.id,
       noUrut: participantData.noUrut,
       namaTim: participantData.namaTim,
     };
@@ -163,5 +167,65 @@ export const getParticipant = async (
       }
     }
     throw new Error("Gagal mendapatkan data peserta.");
+  }
+};
+
+//add nilai participant by uid, eventID, pesertaID
+export const saveNilai = async (
+  eventId: string,
+  pesertaId: string,
+  nilaiData: any
+) => {
+  try {
+    //cek user
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      throw new Error("Pengguna tidak ditemukan.");
+    }
+    const uid = currentUser.uid;
+    console.log("uid", uid);
+
+    //cek event
+    const eventDoc = await getDoc(doc(db, `users/${uid}/events/${eventId}`));
+    if (!eventDoc.exists()) {
+      throw new Error("ID event tidak ditemukan.");
+    }
+    console.log("event", eventId);
+
+    //cek event
+    const pesertaDoc = await getDoc(
+      doc(db, `users/${uid}/events/${eventId}/participants/${pesertaId}`)
+    );
+    if (!pesertaDoc.exists()) {
+      throw new Error("ID peserta tidak ditemukan.");
+    }
+    console.log("peserta", pesertaId);
+
+    //tambahkan nilai
+    await addDoc(
+      collection(
+        db,
+        `users/${uid}/events/${eventId}/participants/${pesertaId}/nilai`
+      ),
+      {
+        pbb: nilaiData.pbb,
+        danton: nilaiData.danton,
+        pengurangan: nilaiData.pengurangan,
+        peringkat: nilaiData.peringkat,
+        varfor: nilaiData.varfor,
+        juaraUmum: nilaiData.juaraUmum,
+      }
+    );
+  } catch (error) {
+    if (error instanceof Error) {
+      if (
+        error.message === "Pengguna tidak ditemukan." ||
+        error.message === "ID event tidak ditemukan." ||
+        error.message === "ID peserta tidak ditemukan."
+      ) {
+        throw error;
+      }
+    }
+    throw new Error("Gagal menambahkan data.");
   }
 };

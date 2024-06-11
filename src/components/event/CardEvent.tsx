@@ -9,7 +9,7 @@ import { Tooltip } from "@mui/material";
 import Link from "next/link";
 
 interface Event {
-  id: string;
+  eventID: string;
   name: string;
   createdAt: Date;
   organizer: string;
@@ -69,7 +69,7 @@ const CardEvent = ({ event }: { event: Event }) => (
         </Tooltip>
       </CardContent>
       <CardActions>
-        <Link href={`event/rekap-juri/${event.id}`} passHref>
+        <Link href={`event/rekap-juri/${event.eventID}`} passHref>
           <Button size="small">Rekap Juri</Button>
         </Link>
       </CardActions>

@@ -11,20 +11,22 @@ import DownloadIcon from "@mui/icons-material/Download";
 
 const RekapNilai = () => {
   const [event, setEvent] = useState<{
-    id: string;
+    eventID: string;
     name: string;
     organizer: string;
     level: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const params = useParams();
-  const id = Array.isArray(params.id) ? params.id[0] : params.id;
+  const eventID = Array.isArray(params.eventID)
+    ? params.eventID[0]
+    : params.eventID;
 
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        if (id) {
-          const eventDetails = await getEvent(id);
+        if (eventID) {
+          const eventDetails = await getEvent(eventID);
           setEvent(eventDetails);
         } else {
           console.error("Event ID tidak ditemukan");
@@ -36,7 +38,7 @@ const RekapNilai = () => {
       }
     };
     fetchEvent();
-  }, [id]);
+  }, [eventID]);
 
   return (
     <section className="mx-auto max-w-[1640px]">

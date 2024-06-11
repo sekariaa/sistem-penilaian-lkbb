@@ -30,7 +30,8 @@
     "styled-components": "^6.1.11",
     "tailwind-merge": "^2.3.0",
     "usehooks-ts": "^3.1.0",
-    "vaul": "^0.9.1"
+    "vaul": "^0.9.1",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
   },
   "devDependencies": {
     "@types/classnames": "^2.3.1",
