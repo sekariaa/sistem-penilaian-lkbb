@@ -183,45 +183,87 @@ export const saveNilai = async (
       throw new Error("Pengguna tidak ditemukan.");
     }
     const uid = currentUser.uid;
-    console.log("uid", uid);
 
     //cek event
     const eventDoc = await getDoc(doc(db, `users/${uid}/events/${eventId}`));
     if (!eventDoc.exists()) {
       throw new Error("ID event tidak ditemukan.");
     }
-    console.log("event", eventId);
 
-    //cek event
+    //cek peserta
     const pesertaDoc = await getDoc(
       doc(db, `users/${uid}/events/${eventId}/participants/${pesertaId}`)
     );
     if (!pesertaDoc.exists()) {
       throw new Error("ID peserta tidak ditemukan.");
     }
-    console.log("peserta", pesertaId);
 
-    //tambahkan nilai
-    await addDoc(
-      collection(
-        db,
-        `users/${uid}/events/${eventId}/participants/${pesertaId}/nilai`
-      ),
-      {
-        pbb: nilaiData.pbb,
-        danton: nilaiData.danton,
-        pengurangan: nilaiData.pengurangan,
-        peringkat: nilaiData.peringkat,
-        varfor: nilaiData.varfor,
-        juaraUmum: nilaiData.juaraUmum,
-      }
+    // Set nilaiData ke dokumen nilai peserta
+    const docRef = doc(
+      db,
+      `users/${uid}/events/${eventId}/participants/${pesertaId}`
     );
+    setDoc(docRef, { nilai: nilaiData }, { merge: true });
   } catch (error) {
     if (error instanceof Error) {
       if (
         error.message === "Pengguna tidak ditemukan." ||
         error.message === "ID event tidak ditemukan." ||
         error.message === "ID peserta tidak ditemukan."
+      ) {
+        throw error;
+      }
+    }
+    throw new Error("Gagal menambahkan data.");
+  }
+};
+
+// Fungsi untuk mendapatkan nilai peserta berdasarkan uid, eventID, pesertaID
+export const getNilai = async (eventId: string, pesertaId: string) => {
+  try {
+    //cek user
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      throw new Error("Pengguna tidak ditemukan.");
+    }
+    const uid = currentUser.uid;
+
+    //cek event
+    const eventDoc = await getDoc(doc(db, `users/${uid}/events/${eventId}`));
+    if (!eventDoc.exists()) {
+      throw new Error("ID event tidak ditemukan.");
+    }
+
+    //cek peserta
+    const pesertaDoc = await getDoc(
+      doc(db, `users/${uid}/events/${eventId}/participants/${pesertaId}`)
+    );
+    if (!pesertaDoc.exists()) {
+      throw new Error("ID peserta tidak ditemukan.");
+    }
+    // Dapatkan referensi dokumen
+    const docRef = doc(
+      db,
+      `users/${uid}/events/${eventId}/participants/${pesertaId}`
+    );
+
+    // Ambil dokumen dari Firestore
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const data = docSnap.data();
+      const nilaiData = data.nilai;
+      return nilaiData;
+    } else {
+      throw new Error("Tidak ada Data. Lakukan upload dokumen!");
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      if (
+        error.message === "Pengguna tidak ditemukan." ||
+        error.message === "ID event tidak ditemukan." ||
+        error.message === "ID peserta tidak ditemukan." ||
+        error.message === "Tidak ada Data. Lakukan upload dokumen!"
       ) {
         throw error;
       }

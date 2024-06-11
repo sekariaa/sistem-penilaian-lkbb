@@ -245,13 +245,13 @@ export default function EnhancedTable() {
                       <TableCell align="center" className="bg-blue-300 w-56">
                         {row.namaTim} <br />
                       </TableCell>
-                      {/* upload nilai */}
-                      <TableCell align="center" className="bg-yellow-300">
+                      <TableCell align="center" className="bg-purple-300">
+                        {/* data nilai */}
                         <Link
-                          href={`/event/rekap-juri/${eventID}/upload-nilai/${row.pesertaID}`}
+                          href={`/event/rekap-juri/${eventID}/data-nilai/${row.pesertaID}`}
                           passHref
                         >
-                          <ButtonComponent intent="Upload Nilai"></ButtonComponent>
+                          <ButtonComponent intent="Data Nilai"></ButtonComponent>
                         </Link>
                         {/* hapus data */}
                         <ButtonComponent intent="Hapus"></ButtonComponent>

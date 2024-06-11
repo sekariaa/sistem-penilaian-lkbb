@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import * as XLSX from "xlsx";
 import { Button } from "@mui/material";
 import { saveNilai } from "@/utils/participant";
+import AlertComponent from "../AlertComponent";
+import CircularProgress from "@mui/material/CircularProgress";
 
 interface HandleFileProps {
   eventID: string;
@@ -15,6 +17,12 @@ const HandleFile: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
 
   // submit state
   const [excelData, setExcelData] = useState<any[] | null>(null);
+
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const [loadingUpload, setLoadingUpload] = useState(false);
+  const [loadingSave, setLoadingSave] = useState(false);
 
   // onchange event
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,12 +47,13 @@ const HandleFile: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
         setExcelFile(null);
       }
     } else {
-      console.log("Silakan pilih berkas.");
+      setTypeError("Silakan pilih berkas.");
     }
   };
 
   // submit event
   const handleFileSubmit = (e: React.FormEvent) => {
+    setLoadingUpload(true);
     e.preventDefault();
     if (excelFile !== null) {
       const workbook = XLSX.read(excelFile, { type: "buffer" });
@@ -64,20 +73,18 @@ const HandleFile: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
           Nilai: cellValueD,
         });
       }
-
       setExcelData(data);
+      setLoadingUpload(false);
     }
   };
 
   const handleSave = async () => {
+    setLoadingSave(true);
     try {
-      console.log(excelData);
       let nilaiData = {};
       if (excelData) {
         for (let i = 0; i < excelData.length; i++) {
           const { Deskripsi, Nilai } = excelData[i];
-          console.log(Deskripsi, Nilai);
-
           switch (Deskripsi.trim()) {
             case "NILAI PBB":
               nilaiData = { ...nilaiData, pbb: Nilai };
@@ -101,14 +108,31 @@ const HandleFile: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
               break;
           }
         }
-        console.log(nilaiData);
+        // Check if nilaiData conforms to the template
+        const requiredFields = [
+          "pbb",
+          "danton",
+          "pengurangan",
+          "peringkat",
+          "varfor",
+          "juaraUmum",
+        ];
+        const missingFields = requiredFields.filter(
+          (field) => !(field in nilaiData)
+        );
+        if (missingFields.length > 0) {
+          throw new Error("File tidak sesuai template.");
+        }
         await saveNilai(eventID, pesertaID, nilaiData);
-        console.log("Data berhasil disimpan ke Firestore.");
+        setSuccess("Data berhasil disimpan ke Firestore.");
+        setLoadingSave(false);
       } else {
-        console.log("Tidak ada data yang disimpan.");
+        setLoadingSave(false);
+        setError("Tidak ada data yang disimpan.");
       }
-    } catch (error) {
-      console.error("Gagal menyimpan data ke Firestore:", error);
+    } catch (error: any) {
+      setLoadingSave(false);
+      setError(error.message);
     }
   };
 
@@ -125,14 +149,20 @@ const HandleFile: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
           required
           onChange={handleFile}
         />
-        <Button
+        <button
           type="submit"
-          variant="contained"
-          size="small"
-          style={{ backgroundColor: "#000000", textTransform: "none" }}
+          className="relative inline-flex items-center justify-center mb-1 overflow-hidden text-sm font-medium text-white rounded group bg-black"
         >
-          Upload
-        </Button>
+          {loadingUpload ? (
+            <span className="relative px-3 py-2 transition-all ease-in duration-75 group-hover:bg-opacity-0 ">
+              <CircularProgress size="1rem" style={{ color: "#ffffff" }} />
+            </span>
+          ) : (
+            <span className="relative px-3 py-2 transition-all ease-in duration-75 group-hover:bg-opacity-0 ">
+              Upload
+            </span>
+          )}
+        </button>
         {typeError && (
           <div className="text-red-500" role="alert">
             {typeError}
@@ -173,15 +203,24 @@ const HandleFile: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
               </tbody>
             </table>
             <div className="flex justify-center items-center">
-              <Button
+              <button
                 type="submit"
-                variant="contained"
-                size="small"
-                style={{ backgroundColor: "#000000", textTransform: "none" }}
+                className="relative inline-flex items-center justify-center mb-1 overflow-hidden text-sm font-medium text-white rounded group bg-black"
                 onClick={handleSave}
               >
-                Simpan
-              </Button>
+                {loadingSave ? (
+                  <span className="relative px-3 py-2 transition-all ease-in duration-75 group-hover:bg-opacity-0 ">
+                    <CircularProgress
+                      size="1rem"
+                      style={{ color: "#ffffff" }}
+                    />
+                  </span>
+                ) : (
+                  <span className="relative px-3 py-2 transition-all ease-in duration-75 group-hover:bg-opacity-0 ">
+                    Masuk
+                  </span>
+                )}
+              </button>
             </div>
           </div>
         ) : (
@@ -190,6 +229,8 @@ const HandleFile: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
           </div>
         )}
       </div>
+      <AlertComponent severity="success" message={success} />
+      <AlertComponent severity="error" message={error} />
     </section>
   );
 };

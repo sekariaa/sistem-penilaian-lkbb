@@ -5,9 +5,11 @@ import Link from "next/link";
 import { IconButton } from "@mui/material";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import CircularProgress from "@mui/material/CircularProgress";
-import HandleFile from "./HandleFile";
+import TableNilai from "./TableNilai";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
+import { Button } from "@mui/material";
 
-const UploadNilai = () => {
+const DataNilai = () => {
   const [participant, setParticipant] = useState<{
     pesertaID: string;
     noUrut: string;
@@ -39,7 +41,7 @@ const UploadNilai = () => {
 
   return (
     <section className="mx-auto max-w-[1640px]">
-      <Link href="./" passHref>
+      <Link href="../" passHref>
         <IconButton style={{ color: "#000000" }}>
           <ArrowBackIosIcon />
         </IconButton>
@@ -53,22 +55,39 @@ const UploadNilai = () => {
         <p className="text-center">Data tidak ditemukan.</p>
       ) : (
         <div>
-          <h1 className="text-center text-3xl font-bold mb-3">Upload Nilai</h1>
-          <div className="space-y-2 mb-3">
-            <p>
-              <span className="font-bold">Nomor urut: </span>{" "}
-              {participant.noUrut}
-            </p>
-            <p>
-              <span className="font-bold">Nama tim: </span>
-              {participant.namaTim}
-            </p>
+          <h1 className="text-center text-3xl font-bold mb-3">Data Nilai</h1>
+          <div className="flex flex-col md:flex-row justify-between">
+            <div className="space-y-2 mb-3">
+              <p>
+                <span className="font-bold">Nomor urut: </span>{" "}
+                {participant.noUrut}
+              </p>
+              <p>
+                <span className="font-bold">Nama tim: </span>
+                {participant.namaTim}
+              </p>
+            </div>
+            <div>
+              <Link
+                href={`/event/rekap-juri/${eventID}/data-nilai/${pesertaID}/upload-nilai`}
+                passHref
+              >
+                <Button
+                  variant="contained"
+                  startIcon={<FileUploadIcon />}
+                  size="small"
+                  style={{ backgroundColor: "#000000", textTransform: "none" }}
+                >
+                  Upload Nilai
+                </Button>
+              </Link>
+            </div>
           </div>
-          <HandleFile eventID={eventID} pesertaID={pesertaID} />
         </div>
       )}
+      <TableNilai eventID={eventID} pesertaID={pesertaID} />
     </section>
   );
 };
 
-export default UploadNilai;
+export default DataNilai;
