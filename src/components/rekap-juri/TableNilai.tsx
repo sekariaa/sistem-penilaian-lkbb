@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { getNilai } from "@/utils/participant";
-import CircularProgress from "@mui/material/CircularProgress";
 import { LinearProgress } from "@mui/material";
 
 interface HandleFileProps {

@@ -14,6 +14,22 @@ import { getCurrentUser } from "./user";
 
 export const db = getFirestore();
 
+// Definisi interface
+interface Nilai {
+  [key: string]: number;
+}
+
+interface NilaiPeserta {
+  pesertaId: string;
+  nilai: Nilai;
+  namaTim: string;
+  noUrut: string;
+}
+
+interface Peringkat extends NilaiPeserta {
+  juara: number;
+}
+
 //add event by uid+eventId
 export const addParticipant = async (
   eventId: string,
@@ -272,16 +288,6 @@ export const getNilai = async (eventId: string, pesertaId: string) => {
   }
 };
 
-interface Nilai {
-  [key: string]: number;
-}
-
-interface NilaiPeserta {
-  pesertaId: string;
-  nilai: Nilai;
-  namaTim: string;
-  noUrut: string;
-}
 export const getAllNilai = async (eventId: string): Promise<NilaiPeserta[]> => {
   try {
     const currentUser = getCurrentUser();
@@ -331,5 +337,32 @@ export const getAllNilai = async (eventId: string): Promise<NilaiPeserta[]> => {
       }
     }
     throw new Error("Gagal menambahkan data.");
+  }
+};
+
+export const peringkat = async (eventId: string): Promise<Peringkat[]> => {
+  try {
+    const allNilai: NilaiPeserta[] = await getAllNilai(eventId);
+
+    const sortedPeserta: Peringkat[] = allNilai
+      .sort((a, b) => {
+        if (a.nilai.peringkat !== b.nilai.peringkat) {
+          return b.nilai.peringkat - a.nilai.peringkat;
+        } else if (a.nilai.pbb !== b.nilai.pbb) {
+          return b.nilai.pbb - a.nilai.pbb;
+        } else if (a.nilai.danton !== b.nilai.danton) {
+          return b.nilai.danton - a.nilai.danton;
+        } else {
+          return a.nilai.pengurangan - b.nilai.pengurangan;
+        }
+      })
+      .map((peserta, index) => ({
+        ...peserta,
+        juara: index + 1,
+      }));
+    console.log(sortedPeserta);
+    return sortedPeserta;
+  } catch (error) {
+    throw new Error("Gagal menghitung peringkat.");
   }
 };

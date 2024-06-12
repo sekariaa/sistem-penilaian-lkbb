@@ -100,3 +100,4 @@ export const getEvent = async (eventID: string) => {
     throw new Error("Gagal mendapatkan event.");
   }
 };
+
