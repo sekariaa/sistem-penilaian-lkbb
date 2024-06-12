@@ -6,47 +6,149 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
+import { getAllNilai } from "@/utils/participant";
+import { useParams } from "next/navigation";
 
-function createData(
-  name: string,
-  calories: number,
-  fat: number,
-  carbs: number,
-  protein: number
-) {
-  return { name, calories, fat, carbs, protein };
+interface Nilai {
+  [key: string]: number;
 }
 
-const rows = [
-  createData("Frozen yoghurt", 159, 6.0, 24, 4.0),
-  createData("Ice cream sandwich", 237, 9.0, 37, 4.3),
-  createData("Eclair", 262, 16.0, 24, 6.0),
-];
+interface NilaiPeserta {
+  pesertaId: string;
+  nilai: Nilai;
+  namaTim: string;
+  noUrut: string;
+  juara: number;
+}
 
 export default function AccessibleTable() {
+  const [nilaiPeserta, setNilaiPeserta] = React.useState<NilaiPeserta[]>([]);
+  const [error, setError] = React.useState<string | null>(null);
+  const [maxJuaraUmum, setMaxJuaraUmum] = React.useState<
+    [string | null, number | null]
+  >([null, null]);
+  const [maxVarfor, setMaxVarfor] = React.useState<
+    [string | null, number | null]
+  >([null, null]);
+  const params = useParams();
+  const eventID = Array.isArray(params.eventID)
+    ? params.eventID[0]
+    : params.eventID;
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getAllNilai(eventID);
+
+        // Mengurutkan peringkat
+        const sortedData = data.sort((a, b) => {
+          if (a.nilai.peringkat !== b.nilai.peringkat) {
+            return b.nilai.peringkat - a.nilai.peringkat;
+          } else if (a.nilai.pbb !== b.nilai.pbb) {
+            return b.nilai.pbb - a.nilai.pbb;
+          } else if (a.nilai.danton !== b.nilai.danton) {
+            return b.nilai.danton - a.nilai.danton;
+          } else {
+            return a.nilai.pengurangan - b.nilai.pengurangan;
+          }
+        });
+        const rankedData = sortedData.map((peserta, index) => ({
+          ...peserta,
+          juara: index + 1,
+        }));
+        setNilaiPeserta(rankedData);
+
+        // Menghitung juara umum tertinggi
+        const sortedJuaraUmum = rankedData.sort((a, b) => {
+          if (a.nilai.juaraUmum !== b.nilai.juaraUmum) {
+            return b.nilai.juaraUmum - a.nilai.juaraUmum;
+          } else {
+            return a.juara - b.juara;
+          }
+        });
+        setMaxJuaraUmum([
+          sortedJuaraUmum[0].pesertaId,
+          sortedJuaraUmum[0].nilai.juaraUmum,
+        ]);
+
+        // Menghitung varfor tertinggi
+        const sortedVarfor = rankedData.sort((a, b) => {
+          if (a.nilai.varfor !== b.nilai.varfor) {
+            return b.nilai.varfor - a.nilai.varfor;
+          } else {
+            return a.juara - b.juara;
+          }
+        });
+        setMaxVarfor([sortedVarfor[0].pesertaId, sortedVarfor[0].nilai.varfor]);
+      } catch (err) {
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError("Gagal mengambil data nilai.");
+        }
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
+
   return (
-    <TableContainer component={Paper}>
+    <TableContainer component={Paper} sx={{ width: "100%", boxShadow: 3 }}>
       <Table sx={{ minWidth: 650 }} aria-label="caption table">
-        <caption>A basic table example with a caption</caption>
-        <TableHead>
+        <caption>HALO</caption>
+        <TableHead sx={{ fontWeight: "bold" }}>
           <TableRow>
-            <TableCell>Dessert (100g serving)</TableCell>
-            <TableCell align="right">Calories</TableCell>
-            <TableCell align="right">Fat&nbsp;(g)</TableCell>
-            <TableCell align="right">Carbs&nbsp;(g)</TableCell>
-            <TableCell align="right">Protein&nbsp;(g)</TableCell>
+            <TableCell align="center">Nomor Urut</TableCell>
+            <TableCell align="center">Nama Tim</TableCell>
+            <TableCell align="center">Nilai PBB</TableCell>
+            <TableCell align="center">Nilai Danton</TableCell>
+            <TableCell align="center">Pengurangan Nilai</TableCell>
+            <TableCell align="center">Juara Peringkat</TableCell>
+            <TableCell align="center">Juara</TableCell>
+            <TableCell align="center">Nilai Varfor</TableCell>
+            <TableCell align="center">Juara Umum</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.name}>
-              <TableCell component="th" scope="row">
-                {row.name}
+          {nilaiPeserta.map((row) => (
+            <TableRow key={row.noUrut}>
+              <TableCell component="th" scope="row" align="center">
+                {row.noUrut}
               </TableCell>
-              <TableCell align="right">{row.calories}</TableCell>
-              <TableCell align="right">{row.fat}</TableCell>
-              <TableCell align="right">{row.carbs}</TableCell>
-              <TableCell align="right">{row.protein}</TableCell>
+              <TableCell align="center">{row.namaTim}</TableCell>
+              <TableCell align="center">{row.nilai["pbb"]}</TableCell>
+              <TableCell align="center">{row.nilai["danton"]}</TableCell>
+              <TableCell align="center">{row.nilai["pengurangan"]}</TableCell>
+              <TableCell align="center">{row.nilai["peringkat"]}</TableCell>
+              <TableCell align="center">{row.juara}</TableCell>
+              <TableCell
+                align="center"
+                sx={{
+                  backgroundColor:
+                    row.nilai["varfor"] === maxVarfor[1] &&
+                    row.pesertaId === maxVarfor[0]
+                      ? "red"
+                      : "inherit",
+                }}
+              >
+                {row.nilai["varfor"]}
+              </TableCell>
+              <TableCell
+                align="center"
+                sx={{
+                  backgroundColor:
+                    row.nilai["juaraUmum"] === maxJuaraUmum[1] &&
+                    row.pesertaId === maxJuaraUmum[0]
+                      ? "green"
+                      : "inherit",
+                }}
+              >
+                {row.nilai["juaraUmum"]}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>

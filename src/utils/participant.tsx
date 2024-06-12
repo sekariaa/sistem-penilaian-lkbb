@@ -271,3 +271,65 @@ export const getNilai = async (eventId: string, pesertaId: string) => {
     throw new Error("Gagal menambahkan data.");
   }
 };
+
+interface Nilai {
+  [key: string]: number;
+}
+
+interface NilaiPeserta {
+  pesertaId: string;
+  nilai: Nilai;
+  namaTim: string;
+  noUrut: string;
+}
+export const getAllNilai = async (eventId: string): Promise<NilaiPeserta[]> => {
+  try {
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      throw new Error("Pengguna tidak ditemukan.");
+    }
+    const uid = currentUser.uid;
+
+    const eventDoc = await getDoc(doc(db, `users/${uid}/events/${eventId}`));
+    if (!eventDoc.exists()) {
+      throw new Error("ID event tidak ditemukan.");
+    }
+
+    const participantsCollectionRef = collection(
+      db,
+      `users/${uid}/events/${eventId}/participants`
+    );
+    const participantsSnapshot = await getDocs(participantsCollectionRef);
+
+    if (participantsSnapshot.empty) {
+      throw new Error("Tidak ada peserta ditemukan.");
+    }
+
+    const allNilai: NilaiPeserta[] = [];
+    participantsSnapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.nilai) {
+        allNilai.push({
+          pesertaId: doc.id,
+          nilai: data.nilai,
+          namaTim: data.namaTim,
+          noUrut: data.noUrut,
+        });
+      }
+    });
+
+    return allNilai;
+  } catch (error) {
+    if (error instanceof Error) {
+      if (
+        error.message === "Pengguna tidak ditemukan." ||
+        error.message === "ID event tidak ditemukan." ||
+        error.message === "ID peserta tidak ditemukan." ||
+        error.message === "Tidak ada Data."
+      ) {
+        throw error;
+      }
+    }
+    throw new Error("Gagal menambahkan data.");
+  }
+};
