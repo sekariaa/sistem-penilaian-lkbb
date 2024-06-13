@@ -6,8 +6,6 @@ import Link from "next/link";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { IconButton } from "@mui/material";
 import TableJuara from "./TableJuara";
-import { Button } from "@mui/material";
-import DownloadIcon from "@mui/icons-material/Download";
 
 const RekapNilai = () => {
   const [event, setEvent] = useState<{
@@ -47,7 +45,6 @@ const RekapNilai = () => {
           <ArrowBackIosIcon />
         </IconButton>
       </Link>
-
       {loading ? (
         <div className="flex justify-center py-5">
           <CircularProgress style={{ color: "#000000" }} />
@@ -71,19 +68,10 @@ const RekapNilai = () => {
                 {event.level}
               </p>
             </div>
-            <div className="mb-3">
-              <Button
-                variant="contained"
-                startIcon={<DownloadIcon />}
-                size="small"
-                style={{ backgroundColor: "#000000", textTransform: "none" }}
-              >
-                Unduh Data
-              </Button>
-            </div>
+            <div className="mb-3"></div>
           </div>
 
-          <TableJuara />
+          <TableJuara eventName={event.name} />
         </div>
       )}
     </section>

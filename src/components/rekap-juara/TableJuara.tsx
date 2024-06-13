@@ -6,9 +6,9 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { getAllNilai } from "@/utils/participant";
+import { getBestVarfor, getJuaraUmum, peringkat } from "@/utils/participant";
 import { useParams } from "next/navigation";
-import * as XLSX from "xlsx";
+import * as XLSX from "xlsx-js-style";
 import { Button } from "@mui/material";
 
 interface Nilai {
@@ -23,15 +23,19 @@ interface NilaiPeserta {
   juara: number;
 }
 
-export default function AccessibleTable() {
+interface Event {
+  eventName: string;
+}
+
+export default function AccessibleTable({ eventName }: Event) {
   const [nilaiPeserta, setNilaiPeserta] = React.useState<NilaiPeserta[]>([]);
   const [error, setError] = React.useState<string | null>(null);
   const [maxJuaraUmum, setMaxJuaraUmum] = React.useState<
-    [string | null, number | null]
-  >([null, null]);
+    [string | null, string | null, number | null]
+  >([null, null, null]);
   const [maxVarfor, setMaxVarfor] = React.useState<
-    [string | null, number | null]
-  >([null, null]);
+    [string | null, string | null, number | null]
+  >([null, null, null]);
   const params = useParams();
   const eventID = Array.isArray(params.eventID)
     ? params.eventID[0]
@@ -40,48 +44,13 @@ export default function AccessibleTable() {
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getAllNilai(eventID);
+        const juara = await peringkat(eventID);
+        const bestVarfor = await getBestVarfor(juara);
+        const juaraUmum = await getJuaraUmum(juara);
 
-        // Mengurutkan peringkat
-        const sortedData = data.sort((a, b) => {
-          if (a.nilai.peringkat !== b.nilai.peringkat) {
-            return b.nilai.peringkat - a.nilai.peringkat;
-          } else if (a.nilai.pbb !== b.nilai.pbb) {
-            return b.nilai.pbb - a.nilai.pbb;
-          } else if (a.nilai.danton !== b.nilai.danton) {
-            return b.nilai.danton - a.nilai.danton;
-          } else {
-            return a.nilai.pengurangan - b.nilai.pengurangan;
-          }
-        });
-        const rankedData = sortedData.map((peserta, index) => ({
-          ...peserta,
-          juara: index + 1,
-        }));
-        setNilaiPeserta(rankedData);
-
-        // Menghitung juara umum tertinggi
-        const sortedJuaraUmum = rankedData.sort((a, b) => {
-          if (a.nilai.juaraUmum !== b.nilai.juaraUmum) {
-            return b.nilai.juaraUmum - a.nilai.juaraUmum;
-          } else {
-            return a.juara - b.juara;
-          }
-        });
-        setMaxJuaraUmum([
-          sortedJuaraUmum[0].pesertaId,
-          sortedJuaraUmum[0].nilai.juaraUmum,
-        ]);
-
-        // Menghitung varfor tertinggi
-        const sortedVarfor = rankedData.sort((a, b) => {
-          if (a.nilai.varfor !== b.nilai.varfor) {
-            return b.nilai.varfor - a.nilai.varfor;
-          } else {
-            return a.juara - b.juara;
-          }
-        });
-        setMaxVarfor([sortedVarfor[0].pesertaId, sortedVarfor[0].nilai.varfor]);
+        setNilaiPeserta(juara);
+        setMaxJuaraUmum(juaraUmum);
+        setMaxVarfor(bestVarfor);
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -95,20 +64,216 @@ export default function AccessibleTable() {
   }, [eventID]);
 
   const exportToExcel = () => {
-    const fileName = "rekap_juara.xlsx";
-    const dataToExport = nilaiPeserta.map((row) => ({
-      "Nomor Urut": row.noUrut,
-      "Nama Tim": row.namaTim,
-      "Nilai PBB": row.nilai["pbb"],
-      "Nilai Danton": row.nilai["danton"],
-      "Pengurangan Nilai": row.nilai["pengurangan"],
-      "Juara Peringkat": row.nilai["peringkat"],
-      Juara: row.juara,
-      "Nilai Varfor": row.nilai["varfor"],
-      "Juara Umum": row.nilai["juaraUmum"],
-    }));
+    const fileName = `Rekap Juara ${eventName}.xlsx`;
 
-    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+    // Menyusun header dengan gaya
+    const header = [
+      {
+        "Nomor Urut": {
+          v: "Nomor Urut",
+          s: {
+            font: { bold: true },
+            fill: { fgColor: { rgb: "CCCCCC" } },
+            border: {
+              top: { style: "thin", color: { rgb: "000000" } },
+              bottom: { style: "thin", color: { rgb: "000000" } },
+              left: { style: "thin", color: { rgb: "000000" } },
+              right: { style: "thin", color: { rgb: "000000" } },
+            },
+          },
+        },
+        "Nama Tim": {
+          v: "Nama Tim",
+          s: {
+            font: { bold: true },
+            fill: { fgColor: { rgb: "CCCCCC" } },
+            border: {
+              top: { style: "thin", color: { rgb: "000000" } },
+              bottom: { style: "thin", color: { rgb: "000000" } },
+              left: { style: "thin", color: { rgb: "000000" } },
+              right: { style: "thin", color: { rgb: "000000" } },
+            },
+          },
+        },
+        "Nilai PBB": {
+          v: "Nilai PBB",
+          s: {
+            font: { bold: true },
+            fill: { fgColor: { rgb: "CCCCCC" } },
+            border: {
+              top: { style: "thin", color: { rgb: "000000" } },
+              bottom: { style: "thin", color: { rgb: "000000" } },
+              left: { style: "thin", color: { rgb: "000000" } },
+              right: { style: "thin", color: { rgb: "000000" } },
+            },
+          },
+        },
+        "Nilai Danton": {
+          v: "Nilai Danton",
+          s: {
+            font: { bold: true },
+            fill: { fgColor: { rgb: "CCCCCC" } },
+            border: {
+              top: { style: "thin", color: { rgb: "000000" } },
+              bottom: { style: "thin", color: { rgb: "000000" } },
+              left: { style: "thin", color: { rgb: "000000" } },
+              right: { style: "thin", color: { rgb: "000000" } },
+            },
+          },
+        },
+        "Pengurangan Nilai": {
+          v: "Pengurangan Nilai",
+          s: {
+            font: { bold: true },
+            fill: { fgColor: { rgb: "CCCCCC" } },
+            border: {
+              top: { style: "thin", color: { rgb: "000000" } },
+              bottom: { style: "thin", color: { rgb: "000000" } },
+              left: { style: "thin", color: { rgb: "000000" } },
+              right: { style: "thin", color: { rgb: "000000" } },
+            },
+          },
+        },
+        "Juara Peringkat": {
+          v: "Juara Peringkat",
+          s: {
+            font: { bold: true },
+            fill: { fgColor: { rgb: "CCCCCC" } },
+            border: {
+              top: { style: "thin", color: { rgb: "000000" } },
+              bottom: { style: "thin", color: { rgb: "000000" } },
+              left: { style: "thin", color: { rgb: "000000" } },
+              right: { style: "thin", color: { rgb: "000000" } },
+            },
+          },
+        },
+        Juara: {
+          v: "Juara",
+          s: {
+            font: { bold: true },
+            fill: { fgColor: { rgb: "CCCCCC" } },
+            border: {
+              top: { style: "thin", color: { rgb: "000000" } },
+              bottom: { style: "thin", color: { rgb: "000000" } },
+              left: { style: "thin", color: { rgb: "000000" } },
+              right: { style: "thin", color: { rgb: "000000" } },
+            },
+          },
+        },
+        "Nilai Varfor": {
+          v: "Nilai Varfor",
+          s: {
+            font: { bold: true },
+            fill: { fgColor: { rgb: "CCCCCC" } },
+            border: {
+              top: { style: "thin", color: { rgb: "000000" } },
+              bottom: { style: "thin", color: { rgb: "000000" } },
+              left: { style: "thin", color: { rgb: "000000" } },
+              right: { style: "thin", color: { rgb: "000000" } },
+            },
+          },
+        },
+        "Juara Umum": {
+          v: "Juara Umum",
+          s: {
+            font: { bold: true },
+            fill: { fgColor: { rgb: "CCCCCC" } },
+            border: {
+              top: { style: "thin", color: { rgb: "000000" } },
+              bottom: { style: "thin", color: { rgb: "000000" } },
+              left: { style: "thin", color: { rgb: "000000" } },
+              right: { style: "thin", color: { rgb: "000000" } },
+            },
+          },
+        },
+      },
+    ];
+
+    const dataToExport = nilaiPeserta.map((row) => {
+      const rowData = {
+        "Nomor Urut": row.noUrut,
+        "Nama Tim": row.namaTim,
+        "Nilai PBB": row.nilai["pbb"],
+        "Nilai Danton": row.nilai["danton"],
+        "Pengurangan Nilai": row.nilai["pengurangan"],
+        "Juara Peringkat": row.nilai["peringkat"],
+        Juara: row.juara,
+        "Nilai Varfor": row.nilai["varfor"],
+        "Juara Umum": row.nilai["juaraUmum"],
+      };
+
+      // Menambahkan border ke semua sel
+      for (const key in rowData) {
+        if (typeof rowData[key] !== "object" || !rowData[key].s) {
+          rowData[key] = {
+            v: rowData[key],
+            s: {
+              border: {
+                top: { style: "thin", color: { rgb: "000000" } },
+                bottom: { style: "thin", color: { rgb: "000000" } },
+                left: { style: "thin", color: { rgb: "000000" } },
+                right: { style: "thin", color: { rgb: "000000" } },
+              },
+            },
+          };
+        } else {
+          rowData[key].s.border = {
+            top: { style: "thin", color: { rgb: "000000" } },
+            bottom: { style: "thin", color: { rgb: "000000" } },
+            left: { style: "thin", color: { rgb: "000000" } },
+            right: { style: "thin", color: { rgb: "000000" } },
+          };
+        }
+      }
+
+      // Menandai baris dengan juara umum tertinggi dengan latar belakang hijau
+      if (
+        row.nilai["juaraUmum"] === maxJuaraUmum[2] &&
+        row.pesertaId === maxJuaraUmum[0]
+      ) {
+        rowData["Juara Umum"] = {
+          v: row.nilai["juaraUmum"],
+          s: {
+            fill: { fgColor: { rgb: "00cc00" } },
+            border: {
+              top: { style: "thin", color: { rgb: "000000" } },
+              bottom: { style: "thin", color: { rgb: "000000" } },
+              left: { style: "thin", color: { rgb: "000000" } },
+              right: { style: "thin", color: { rgb: "000000" } },
+            },
+          },
+        };
+      }
+
+      // Menandai baris dengan varfor tertinggi dengan latar belakang hijau
+      if (
+        row.nilai["varfor"] === maxVarfor[2] &&
+        row.pesertaId === maxVarfor[0]
+      ) {
+        rowData["Nilai Varfor"] = {
+          v: row.nilai["varfor"],
+          s: {
+            fill: { fgColor: { rgb: "00cc00" } },
+            border: {
+              top: { style: "thin", color: { rgb: "000000" } },
+              bottom: { style: "thin", color: { rgb: "000000" } },
+              left: { style: "thin", color: { rgb: "000000" } },
+              right: { style: "thin", color: { rgb: "000000" } },
+            },
+          },
+        };
+      }
+      return rowData;
+    });
+
+    // Menggabungkan header dan data
+    const dataWithHeader = [header[0], ...dataToExport];
+
+    const worksheet = XLSX.utils.json_to_sheet([]);
+    XLSX.utils.sheet_add_json(worksheet, dataWithHeader, {
+      skipHeader: true,
+      origin: "A1",
+    });
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Juara");
     XLSX.writeFile(workbook, fileName);
@@ -117,12 +282,10 @@ export default function AccessibleTable() {
   return (
     <section>
       <Button onClick={exportToExcel} variant="contained" color="primary">
-        Export to Excel
+        Unduh Data
       </Button>
-
       <TableContainer component={Paper} sx={{ width: "100%", boxShadow: 3 }}>
         <Table sx={{ minWidth: 650 }} aria-label="caption table">
-          <caption>HALO</caption>
           <TableHead sx={{ fontWeight: "bold" }}>
             <TableRow>
               <TableCell align="center">Nomor Urut</TableCell>
@@ -156,7 +319,7 @@ export default function AccessibleTable() {
                     align="center"
                     sx={{
                       backgroundColor:
-                        row.nilai["varfor"] === maxVarfor[1] &&
+                        row.nilai["varfor"] === maxVarfor[2] &&
                         row.pesertaId === maxVarfor[0]
                           ? "red"
                           : "inherit",
@@ -168,7 +331,7 @@ export default function AccessibleTable() {
                     align="center"
                     sx={{
                       backgroundColor:
-                        row.nilai["juaraUmum"] === maxJuaraUmum[1] &&
+                        row.nilai["juaraUmum"] === maxJuaraUmum[2] &&
                         row.pesertaId === maxJuaraUmum[0]
                           ? "green"
                           : "inherit",

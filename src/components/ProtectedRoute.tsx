@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import { useAuth } from "../context/auth";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,

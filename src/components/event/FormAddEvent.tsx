@@ -16,9 +16,12 @@ const FormAddEvent = () => {
   const [success, setSuccess] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
+    setError(null);
     e.preventDefault();
     if (!eventName || !organizer || !level) {
+      console.log("hh");
       setError("Form tidak boleh kosong");
+      setTimeout(() => setError(null), 3000);
       return;
     }
     console.log("Nama event:", eventName);
@@ -29,12 +32,15 @@ const FormAddEvent = () => {
       await addevent(eventName, organizer, level);
       setIsLoading(false);
       setSuccess("Event berhasil ditambahkan!");
+      setTimeout(() => setSuccess(null), 3000);
       setEventName("");
       setOrganizer("");
       setLevel("");
     } catch (error) {
       setIsLoading(false);
       setError("Gagal menambahkan event. Silakan coba lagi.");
+      setError(null);
+      setTimeout(() => setError(null), 3000);
     }
   };
 

@@ -360,9 +360,92 @@ export const peringkat = async (eventId: string): Promise<Peringkat[]> => {
         ...peserta,
         juara: index + 1,
       }));
-    console.log(sortedPeserta);
     return sortedPeserta;
   } catch (error) {
     throw new Error("Gagal menghitung peringkat.");
+  }
+};
+
+export const getJuaraUmum = (
+  sortedPeserta: Peringkat[]
+): [string, string, number] => {
+  const sortedJuaraUmum = [...sortedPeserta].sort((a, b) => {
+    if (a.nilai.juaraUmum !== b.nilai.juaraUmum) {
+      return b.nilai.juaraUmum - a.nilai.juaraUmum;
+    } else {
+      return a.juara - b.juara;
+    }
+  });
+
+  return [
+    sortedJuaraUmum[0].pesertaId,
+    sortedJuaraUmum[0].namaTim,
+    sortedJuaraUmum[0].nilai.juaraUmum,
+  ];
+};
+
+export const getBestVarfor = (
+  sortedPeserta: Peringkat[]
+): [string, string, number] => {
+  const sortedVarfor = [...sortedPeserta].sort((a, b) => {
+    if (a.nilai.varfor !== b.nilai.varfor) {
+      return b.nilai.varfor - a.nilai.varfor;
+    } else {
+      return a.juara - b.juara;
+    }
+  });
+
+  return [
+    sortedVarfor[0].pesertaId,
+    sortedVarfor[0].namaTim,
+    sortedVarfor[0].nilai.varfor,
+  ];
+};
+
+//masukkan peringkat, getjuaraumum, getbestvarfor kedalam firestor
+export const addAllJuara = async (eventId: string) => {
+  try {
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      throw new Error("Pengguna tidak ditemukan.");
+    }
+    const uid = currentUser.uid;
+
+    // Get all rankings
+    const sortedPeserta = await peringkat(eventId);
+
+    // Determine overall winner
+    const [juaraUmumId, juaraUmumScore] = getJuaraUmum(sortedPeserta);
+
+    // Determine best varfor
+    const [bestVarforId, bestVarforScore] = getBestVarfor(sortedPeserta);
+
+    // Create a reference to the event document
+    const eventDocRef = doc(db, `users/${uid}/events/${eventId}`);
+
+    // Update the event document with the new rankings
+    await setDoc(
+      eventDocRef,
+      {
+        peringkat: sortedPeserta,
+        juaraUmum: {
+          pesertaId: juaraUmumId,
+          score: juaraUmumScore,
+        },
+        bestVarfor: {
+          pesertaId: bestVarforId,
+          score: bestVarforScore,
+        },
+      },
+      { merge: true }
+    );
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(
+        "Gagal menambahkan data juara ke Firestore: " + error.message
+      );
+    } else {
+      throw new Error("Gagal menambahkan data juara ke Firestore.");
+    }
   }
 };

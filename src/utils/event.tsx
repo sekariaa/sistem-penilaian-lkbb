@@ -8,6 +8,7 @@ import {
   getDocs,
   addDoc,
   getDoc,
+  orderBy,
 } from "firebase/firestore";
 import { getCurrentUser } from "./user";
 
@@ -51,7 +52,10 @@ export const getEvents = async () => {
 
     if (currentUser) {
       const uid = currentUser.uid;
-      const q = query(collection(db, `users/${uid}/events`));
+      const q = query(
+        collection(db, `users/${uid}/events`),
+        orderBy("createdAt", "desc")
+      );
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) => {
         const eventData = doc.data();
@@ -100,4 +104,3 @@ export const getEvent = async (eventID: string) => {
     throw new Error("Gagal mendapatkan event.");
   }
 };
-

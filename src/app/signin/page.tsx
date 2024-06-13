@@ -34,7 +34,8 @@ const LoginPage = () => {
       router.push("/");
     } catch (error: any) {
       setIsLoading(false);
-      setError(GetSignInErrorMessage(error.code));
+      const err = GetSignInErrorMessage(error.code);
+      setError(err);
     }
   };
 

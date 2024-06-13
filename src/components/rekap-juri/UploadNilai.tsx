@@ -64,7 +64,11 @@ const UploadNilai = () => {
               {participant.namaTim}
             </p>
           </div>
-          <HandleFile eventID={eventID} pesertaID={pesertaID} />
+          <HandleFile
+            eventID={eventID}
+            pesertaID={pesertaID}
+            noUrut={participant.noUrut}
+          />
         </div>
       )}
     </section>

@@ -1,5 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { peringkat } from "@/utils/participant";
+import {
+  peringkat,
+  getBestVarfor,
+  getJuaraUmum,
+  addAllJuara,
+} from "@/utils/participant";
 
 interface Nilai {
   peringkat: number;
@@ -21,12 +26,18 @@ interface Peringkat {
 const Test = () => {
   const [peringkatData, setPeringkatData] = useState<Peringkat[]>([]);
   const [error, setError] = useState<string>("");
+  const id = "0vI9yhK1EVIHPqhgg1Ms";
 
   useEffect(() => {
     const fetchPeringkat = async () => {
       try {
-        const data = await peringkat("0vI9yhK1EVIHPqhgg1Ms"); // Ganti 'eventID' dengan ID event yang sesuai
-        setPeringkatData(data);
+        const data = await peringkat(id);
+        const xxx = await getBestVarfor(data);
+        const yyy = await getJuaraUmum(data);
+        console.log("juara", data);
+        console.log("varfor", xxx);
+        console.log("umum", yyy);
+        // setPeringkatData(data);
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -39,21 +50,23 @@ const Test = () => {
     fetchPeringkat();
   }, []);
 
+  const handleClick = async () => {
+    try {
+      await addAllJuara(id);
+      console.log("Data juara berhasil ditambahkan.");
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Gagal menambahkan data juara.");
+      }
+    }
+  };
+
   return (
     <div>
       <h1>Test</h1>
-      {/* {error && <p>{error}</p>}
-      {peringkatData.length > 0 ? (
-        <ul>
-          {peringkatData.map((item, index) => (
-            <li key={item.pesertaId}>
-              {index + 1}. {item.namaTim} - {item.nilai.peringkat}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p>Loading...</p>
-      )} */}
+      <button onClick={handleClick}>HALO</button>
     </div>
   );
 };

@@ -1,22 +1,27 @@
 import React, { useState } from "react";
 import * as XLSX from "xlsx";
-import { Button } from "@mui/material";
-import { saveNilai } from "@/utils/participant";
+import { addAllJuara, saveNilai } from "@/utils/participant";
 import AlertComponent from "../AlertComponent";
 import CircularProgress from "@mui/material/CircularProgress";
 
 interface HandleFileProps {
   eventID: string;
   pesertaID: string;
+  noUrut: string;
 }
 
-const HandleFile: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
+const HandleFile: React.FC<HandleFileProps> = ({
+  eventID,
+  pesertaID,
+  noUrut,
+}) => {
   // onchange states
   const [excelFile, setExcelFile] = useState<ArrayBuffer | null>(null);
   const [typeError, setTypeError] = useState<string | null>(null);
 
   // submit state
   const [excelData, setExcelData] = useState<any[] | null>(null);
+  const [noUrutExcel, setNoUrutExcel] = useState<string[] | null>(null);
 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -26,6 +31,7 @@ const HandleFile: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
 
   // onchange event
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTypeError(null);
     let fileTypes = [
       "application/vnd.ms-excel",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -34,19 +40,22 @@ const HandleFile: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
     let selectedFile = e.target?.files?.[0];
     if (selectedFile) {
       if (fileTypes.includes(selectedFile.type)) {
-        setTypeError(null);
+        setLoadingUpload(true);
         let reader = new FileReader();
         reader.readAsArrayBuffer(selectedFile);
         reader.onload = (e) => {
           if (e.target) {
             setExcelFile(e.target.result as ArrayBuffer);
+            setLoadingUpload(false);
           }
         };
       } else {
+        setLoadingUpload(false);
         setTypeError("Silakan pilih jenis file excel saja.");
         setExcelFile(null);
       }
     } else {
+      setLoadingUpload(false);
       setTypeError("Silakan pilih berkas.");
     }
   };
@@ -73,12 +82,24 @@ const HandleFile: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
           Nilai: cellValueD,
         });
       }
+
+      // Extract No Urut from cell B2
+      const noUrutValue = worksheet[`B2`]?.v || null;
+      setNoUrutExcel(noUrutValue ? noUrutValue.toString() : null);
+
       setExcelData(data);
       setLoadingUpload(false);
+      setError(null);
     }
+    setLoadingUpload(false);
   };
 
   const handleSave = async () => {
+    setError(null);
+    if (noUrut !== noUrutExcel[0]) {
+      setError("Nomor urut tidak sama");
+      return;
+    }
     setLoadingSave(true);
     try {
       let nilaiData = {};
@@ -124,7 +145,9 @@ const HandleFile: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
           throw new Error("File tidak sesuai template.");
         }
         await saveNilai(eventID, pesertaID, nilaiData);
-        setSuccess("Data berhasil disimpan ke Firestore.");
+        await addAllJuara(eventID);
+        setSuccess("Data berhasil disimpan.");
+        console.log("berhasil");
         setLoadingSave(false);
       } else {
         setLoadingSave(false);
@@ -134,6 +157,7 @@ const HandleFile: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
       setLoadingSave(false);
       setError(error.message);
     }
+    setError(null);
   };
 
   return (
@@ -174,6 +198,7 @@ const HandleFile: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
       <div className="my-3">
         {excelData ? (
           <div>
+            <p className="mb-3 font-bold">No Urut: {noUrutExcel}</p>
             <table className="w-full border-collapse border border-gray-400 mb-3">
               <thead>
                 <tr>
@@ -217,7 +242,7 @@ const HandleFile: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
                   </span>
                 ) : (
                   <span className="relative px-3 py-2 transition-all ease-in duration-75 group-hover:bg-opacity-0 ">
-                    Masuk
+                    Simpan
                   </span>
                 )}
               </button>
