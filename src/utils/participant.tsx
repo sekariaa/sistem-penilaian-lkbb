@@ -9,6 +9,9 @@ import {
   addDoc,
   getDoc,
   setDoc,
+  Timestamp,
+  deleteDoc,
+  DocumentReference,
 } from "firebase/firestore";
 import { getCurrentUser } from "./user";
 
@@ -23,7 +26,7 @@ interface NilaiPeserta {
   pesertaId: string;
   nilai: Nilai;
   namaTim: string;
-  noUrut: string;
+  noUrut: number;
 }
 
 interface Peringkat extends NilaiPeserta {
@@ -33,7 +36,7 @@ interface Peringkat extends NilaiPeserta {
 //add event by uid+eventId
 export const addParticipant = async (
   eventId: string,
-  noUrut: string,
+  noUrut: number,
   namaTim: string
 ) => {
   try {
@@ -60,17 +63,15 @@ export const addParticipant = async (
       throw new Error("Nomor urut sudah digunakan oleh peserta lain.");
     }
 
-    //cek no urut hanya boleh angka
-    if (!/^\d+$/.test(noUrut)) {
-      throw new Error("Nomor urut hanya boleh berisi angka.");
-    }
-
+    const timestamp = Timestamp.now();
     //tambahkan peserta
     await addDoc(
       collection(db, `users/${uid}/events/${eventId}/participants`),
       {
         noUrut: noUrut,
         namaTim: namaTim,
+        createdAt: timestamp,
+        updatedAt: timestamp,
       }
     );
   } catch (error) {
@@ -78,8 +79,7 @@ export const addParticipant = async (
       if (
         error.message === "Pengguna tidak ditemukan." ||
         error.message === "ID event tidak ditemukan." ||
-        error.message === "Nomor urut sudah digunakan oleh peserta lain." ||
-        error.message === "Nomor urut hanya boleh berisi angka."
+        error.message === "Nomor urut sudah digunakan oleh peserta lain."
       ) {
         throw error;
       }
@@ -88,24 +88,79 @@ export const addParticipant = async (
   }
 };
 
-//get all participants by uid+eventid
-export const getParticipants = async (eventId: string) => {
+// edit participant
+export const editParticipant = async (
+  eventId: string,
+  pesertaId: string,
+  newNamaTim: string
+) => {
   try {
+    //cek user
     const currentUser = getCurrentUser();
-    const participantList: {
-      pesertaID: string;
-      noUrut: string;
-      namaTim: string;
-    }[] = [];
-
-    //cek uid
     if (!currentUser) {
       throw new Error("Pengguna tidak ditemukan.");
     }
     const uid = currentUser.uid;
 
     //cek event
-    if (!eventId) {
+    const eventDoc = await getDoc(doc(db, `users/${uid}/events/${eventId}`));
+    if (!eventDoc.exists()) {
+      throw new Error("ID event tidak ditemukan.");
+    }
+
+    //cek peserta
+    const pesertaDoc = await getDoc(
+      doc(db, `users/${uid}/events/${eventId}/participants/${pesertaId}`)
+    );
+    if (!pesertaDoc.exists()) {
+      throw new Error("ID peserta tidak ditemukan.");
+    }
+
+    const timestamp = Timestamp.now();
+    const participantRef = doc(
+      db,
+      `users/${uid}/events/${eventId}/participants/${pesertaId}`
+    );
+
+    // Perbarui dokumen dengan nama tim yang baru
+    await setDoc(
+      participantRef,
+      { namaTim: newNamaTim, updatedAt: timestamp },
+      { merge: true }
+    );
+  } catch (error) {
+    if (error instanceof Error) {
+      if (
+        error.message === "Pengguna tidak ditemukan." ||
+        error.message === "ID event tidak ditemukan." ||
+        error.message === "ID peserta tidak ditemukan."
+      ) {
+        throw error;
+      }
+    }
+    throw new Error("Gagal mengedit data peserta.");
+  }
+};
+
+//get all participants by uid+eventid
+export const getParticipants = async (eventId: string) => {
+  try {
+    const participantList: {
+      pesertaID: string;
+      noUrut: number;
+      namaTim: string;
+    }[] = [];
+
+    //cek user
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      throw new Error("Pengguna tidak ditemukan.");
+    }
+    const uid = currentUser.uid;
+
+    //cek event
+    const eventDoc = await getDoc(doc(db, `users/${uid}/events/${eventId}`));
+    if (!eventDoc.exists()) {
       throw new Error("ID event tidak ditemukan.");
     }
 
@@ -138,21 +193,24 @@ export const getParticipants = async (eventId: string) => {
 };
 
 //get single participant by uid dan eventid
-export const getParticipant = async (
-  eventId: string,
-  participantId: string
-) => {
+export const getParticipant = async (eventId: string, pesertaId: string) => {
   try {
+    //cek user
     const currentUser = getCurrentUser();
     if (!currentUser) {
       throw new Error("Pengguna tidak ditemukan.");
     }
-
     const uid = currentUser.uid;
+
+    //cek event
+    const eventDoc = await getDoc(doc(db, `users/${uid}/events/${eventId}`));
+    if (!eventDoc.exists()) {
+      throw new Error("ID event tidak ditemukan.");
+    }
 
     const q = doc(
       db,
-      `users/${uid}/events/${eventId}/participants/${participantId}`
+      `users/${uid}/events/${eventId}/participants/${pesertaId}`
     );
 
     const docSnap = await getDoc(q);
@@ -183,6 +241,39 @@ export const getParticipant = async (
       }
     }
     throw new Error("Gagal mendapatkan data peserta.");
+  }
+};
+
+//delete participant by uid, eventid, dan peserta
+export const deleteParticipant = async (eventId: string, pesertaId: string) => {
+  try {
+    //cek user
+    const currentUser = getCurrentUser();
+    if (!currentUser) {
+      throw new Error("Pengguna tidak ditemukan.");
+    }
+    const uid = currentUser.uid;
+
+    //cek event
+    const eventDoc = await getDoc(doc(db, `users/${uid}/events/${eventId}`));
+    if (!eventDoc.exists()) {
+      throw new Error("ID event tidak ditemukan.");
+    }
+
+    //hapus
+    const pesertaDoc = await getDoc(doc(db, `users/${uid}/events/${eventId}`));
+    if (!pesertaDoc.exists()) {
+      throw new Error("ID peserta tidak ditemukan.");
+    }
+    await deleteDoc(
+      doc(db, `users/${uid}/events/${eventId}/participants/${pesertaId}`)
+    );
+    return "Peserta berhasil dihapus.";
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(error.message); // Propagate the error message
+    }
+    throw new Error("Gagal menghapus peserta.");
   }
 };
 

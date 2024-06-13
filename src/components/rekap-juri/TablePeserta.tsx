@@ -11,21 +11,21 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import Paper from "@mui/material/Paper";
 import { visuallyHidden } from "@mui/utils";
 import { useParams } from "next/navigation";
-import { getParticipants } from "@/utils/participant";
+import { getParticipants, deleteParticipant } from "@/utils/participant";
 import LinearProgress from "@mui/material/LinearProgress";
 import ButtonComponent from "./ButtonComponent";
 import Link from "next/link";
 
 interface Data {
   pesertaID: string;
-  noUrut: string;
+  noUrut: number;
   namaTim: string;
   lainnya: any;
 }
 
 function createData(
   pesertaID: string,
-  noUrut: string,
+  noUrut: number,
   namaTim: string,
   lainnya: any
 ): Data {
@@ -210,6 +210,21 @@ export default function EnhancedTable() {
     setPage(0);
   };
 
+  const handleDeleteParticipant = async (pesertaID: string) => {
+    try {
+      setLoading(true);
+      await deleteParticipant(eventID, pesertaID);
+      const updatedParticipants = participants.filter(
+        (p) => p.pesertaID !== pesertaID
+      );
+      setParticipants(updatedParticipants);
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.error("Failed to delete participant:", error);
+    }
+  };
+
   const visibleRows = React.useMemo(
     () =>
       stableSort(participants, getComparator(order, orderBy)).slice(
@@ -253,8 +268,19 @@ export default function EnhancedTable() {
                         >
                           <ButtonComponent intent="Data Nilai"></ButtonComponent>
                         </Link>
+                        {/* edit peserta */}
+                        <Link
+                          href={`/event/rekap-juri/${eventID}/edit-peserta/${row.pesertaID}`}
+                          passHref
+                        >
+                          <ButtonComponent intent="Edit Peserta"></ButtonComponent>
+                        </Link>
                         {/* hapus data */}
-                        <ButtonComponent intent="Hapus"></ButtonComponent>
+                        <button
+                          onClick={() => handleDeleteParticipant(row.pesertaID)}
+                        >
+                          <ButtonComponent intent="Hapus"></ButtonComponent>
+                        </button>
                       </TableCell>
                     </TableRow>
                   ))
