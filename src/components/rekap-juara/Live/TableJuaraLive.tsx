@@ -6,8 +6,7 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { getBestVarfor, getJuaraUmum, peringkat } from "@/utils/participant";
-import { getEvent } from "@/utils/event";
+import { getBestVarfor, getJuaraUmum, peringkat, getEvent } from "@/utils/live";
 import { useParams } from "next/navigation";
 import * as XLSX from "xlsx-js-style";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -86,7 +85,6 @@ export default function AccessibleTable({ eventName }: Event) {
         const bestVarfor = await getBestVarfor(juara);
         const juaraUmum = await getJuaraUmum(juara);
         const updated = (await getEvent(eventID)).updatedAt;
-        console.log(updated);
 
         setNilaiPeserta(juara);
         setMaxJuaraUmum(juaraUmum);
@@ -94,6 +92,7 @@ export default function AccessibleTable({ eventName }: Event) {
         if (updated && updated.seconds) {
           const updatedDate = new Date(updated.seconds * 1000);
           setUpdatedAt(updatedDate);
+          console.log(updatedDate);
         } else {
           setUpdatedAt(null);
         }

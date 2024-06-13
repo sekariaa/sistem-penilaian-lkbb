@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { addParticipant } from "@/utils/participant";
+import { addAllJuara } from "@/utils/participant";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { IconButton } from "@mui/material";
 import Link from "next/link";
@@ -53,6 +53,7 @@ const EditPeserta = () => {
     try {
       setIsLoading(true);
       await editParticipant(eventID, pesertaID, namaTimNew);
+      await addAllJuara(eventID);
       setIsLoading(false);
       setSuccess("Peserta berhasil ditambahkan!");
       setTimeout(() => setSuccess(null), 3000);

@@ -19,14 +19,10 @@ const FormAddEvent = () => {
     setError(null);
     e.preventDefault();
     if (!eventName || !organizer || !level) {
-      console.log("hh");
       setError("Form tidak boleh kosong");
       setTimeout(() => setError(null), 3000);
       return;
     }
-    console.log("Nama event:", eventName);
-    console.log("Organizer:", organizer);
-    console.log(level);
     try {
       setIsLoading(true);
       await addevent(eventName, organizer, level);

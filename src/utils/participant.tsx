@@ -509,10 +509,12 @@ export const addAllJuara = async (eventId: string) => {
     const sortedPeserta = await peringkat(eventId);
 
     // Determine overall winner
-    const [juaraUmumId, juaraUmumScore] = getJuaraUmum(sortedPeserta);
+    const [juaraUmumId, juaraUmumTim, juaraUmumScore] =
+      getJuaraUmum(sortedPeserta);
 
     // Determine best varfor
-    const [bestVarforId, bestVarforScore] = getBestVarfor(sortedPeserta);
+    const [bestVarforId, bestVarforTim, bestVarforScore] =
+      getBestVarfor(sortedPeserta);
 
     // Create a reference to the event document
     const eventDocRef = doc(db, `users/${uid}/events/${eventId}`);
@@ -524,10 +526,32 @@ export const addAllJuara = async (eventId: string) => {
         peringkat: sortedPeserta,
         juaraUmum: {
           pesertaId: juaraUmumId,
+          namaTim: juaraUmumTim,
           score: juaraUmumScore,
         },
         bestVarfor: {
           pesertaId: bestVarforId,
+          namaTim: bestVarforTim,
+          score: bestVarforScore,
+        },
+        updatedAt: serverTimestamp(),
+      },
+      { merge: true }
+    );
+
+    //tanpa user
+    await setDoc(
+      doc(db, `events/${eventId}`),
+      {
+        peringkat: sortedPeserta,
+        juaraUmum: {
+          pesertaId: juaraUmumId,
+          namaTim: juaraUmumTim,
+          score: juaraUmumScore,
+        },
+        bestVarfor: {
+          pesertaId: bestVarforId,
+          namaTim: bestVarforTim,
           score: bestVarforScore,
         },
         updatedAt: serverTimestamp(),

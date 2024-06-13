@@ -11,7 +11,11 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import Paper from "@mui/material/Paper";
 import { visuallyHidden } from "@mui/utils";
 import { useParams } from "next/navigation";
-import { getParticipants, deleteParticipant } from "@/utils/participant";
+import {
+  getParticipants,
+  deleteParticipant,
+  addAllJuara,
+} from "@/utils/participant";
 import LinearProgress from "@mui/material/LinearProgress";
 import ButtonComponent from "./ButtonComponent";
 import Link from "next/link";
@@ -216,6 +220,7 @@ export default function EnhancedTable() {
       try {
         setLoading(true);
         await deleteParticipant(eventID, pesertaID);
+        await addAllJuara(eventID);
         const updatedParticipants = participants.filter(
           (p) => p.pesertaID !== pesertaID
         );
