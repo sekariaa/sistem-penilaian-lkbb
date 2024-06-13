@@ -211,17 +211,20 @@ export default function EnhancedTable() {
   };
 
   const handleDeleteParticipant = async (pesertaID: string) => {
-    try {
-      setLoading(true);
-      await deleteParticipant(eventID, pesertaID);
-      const updatedParticipants = participants.filter(
-        (p) => p.pesertaID !== pesertaID
-      );
-      setParticipants(updatedParticipants);
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      console.error("Failed to delete participant:", error);
+    const confirmed = window.confirm("Apakah Anda yakin untuk menghapus data?");
+    if (confirmed) {
+      try {
+        setLoading(true);
+        await deleteParticipant(eventID, pesertaID);
+        const updatedParticipants = participants.filter(
+          (p) => p.pesertaID !== pesertaID
+        );
+        setParticipants(updatedParticipants);
+        setLoading(false);
+      } catch (error) {
+        setLoading(false);
+        console.error("Failed to delete participant:", error);
+      }
     }
   };
 
@@ -253,14 +256,19 @@ export default function EnhancedTable() {
             <TableBody>
               {!loading && participants.length > 0
                 ? visibleRows.map((row) => (
-                    <TableRow key={row.noUrut}>
-                      <TableCell align="center" className="bg-green-300 w-36">
+                    <TableRow
+                      key={row.noUrut}
+                      sx={{
+                        "&:nth-of-type(odd)": { backgroundColor: "#f3f3f3" },
+                      }}
+                    >
+                      <TableCell align="center" className="w-36">
                         {row.noUrut}
                       </TableCell>
-                      <TableCell align="center" className="bg-blue-300 w-56">
+                      <TableCell align="center" className=" w-56">
                         {row.namaTim} <br />
                       </TableCell>
-                      <TableCell align="center" className="bg-purple-300">
+                      <TableCell align="center">
                         {/* data nilai */}
                         <Link
                           href={`/event/rekap-juri/${eventID}/data-nilai/${row.pesertaID}`}

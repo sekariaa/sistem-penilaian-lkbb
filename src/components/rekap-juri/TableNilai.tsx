@@ -7,20 +7,59 @@ interface HandleFileProps {
   pesertaID: string;
 }
 
+const formatDate = (date: Date | null): string => {
+  if (!date) return "-"; // Handle null or undefined case
+
+  const months = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ];
+
+  const day = date.getDate();
+  const monthIndex = date.getMonth();
+  const year = date.getFullYear();
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const seconds = date.getSeconds();
+
+  // Pad single digit numbers with leading zero
+  const formattedHours = hours.toString().padStart(2, "0");
+  const formattedMinutes = minutes.toString().padStart(2, "0");
+  const formattedSeconds = seconds.toString().padStart(2, "0");
+
+  return `${day} ${months[monthIndex]} ${year} pada ${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+};
+
 const TableNilai: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
   const [nilaiData, setNilaiData] = useState<Record<string, number> | null>(
     null
   );
+  const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getNilai(eventID, pesertaID);
-        setNilaiData(data);
+        const { nilaiData, updatedAt } = await getNilai(eventID, pesertaID);
+        setNilaiData(nilaiData);
+        if (updatedAt && updatedAt.seconds) {
+          const updatedDate = new Date(updatedAt.seconds * 1000);
+          setUpdatedAt(updatedDate);
+        } else {
+          setUpdatedAt(null);
+        }
         setLoading(false);
       } catch (error) {
-        console.error("Gagal mengambil data nilai:", error);
         setLoading(false);
       }
     };
@@ -80,6 +119,15 @@ const TableNilai: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
                 </tr>
               ))}
             </tbody>
+            {updatedAt && (
+              <tfoot>
+                <tr>
+                  <td colSpan={2} className="text-center text-red-500">
+                    Diupdate Pada: {formatDate(updatedAt)}
+                  </td>
+                </tr>
+              </tfoot>
+            )}
           </table>
         </div>
       )}

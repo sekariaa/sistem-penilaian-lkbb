@@ -7,9 +7,11 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { getBestVarfor, getJuaraUmum, peringkat } from "@/utils/participant";
+import { getEvent } from "@/utils/event";
 import { useParams } from "next/navigation";
 import * as XLSX from "xlsx-js-style";
-import { Button } from "@mui/material";
+import CircularProgress from "@mui/material/CircularProgress";
+import { LinearProgress } from "@mui/material";
 
 interface Nilai {
   [key: string]: number;
@@ -19,13 +21,46 @@ interface NilaiPeserta {
   pesertaId: string;
   nilai: Nilai;
   namaTim: string;
-  noUrut: string;
+  noUrut: number;
   juara: number;
 }
 
 interface Event {
   eventName: string;
 }
+
+const formatDate = (date: Date | null): string => {
+  if (!date) return "-"; // Handle null or undefined case
+
+  const months = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Agustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ];
+
+  const day = date.getDate();
+  const monthIndex = date.getMonth();
+  const year = date.getFullYear();
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const seconds = date.getSeconds();
+
+  // Pad single digit numbers with leading zero
+  const formattedHours = hours.toString().padStart(2, "0");
+  const formattedMinutes = minutes.toString().padStart(2, "0");
+  const formattedSeconds = seconds.toString().padStart(2, "0");
+
+  return `${day} ${months[monthIndex]} ${year} pada ${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
+};
 
 export default function AccessibleTable({ eventName }: Event) {
   const [nilaiPeserta, setNilaiPeserta] = React.useState<NilaiPeserta[]>([]);
@@ -40,6 +75,9 @@ export default function AccessibleTable({ eventName }: Event) {
   const eventID = Array.isArray(params.eventID)
     ? params.eventID[0]
     : params.eventID;
+  const [loadingExport, setLoadingExport] = React.useState(false);
+  const [loading, setLoading] = React.useState(true);
+  const [updatedAt, setUpdatedAt] = React.useState<Date | null>(null);
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -47,16 +85,25 @@ export default function AccessibleTable({ eventName }: Event) {
         const juara = await peringkat(eventID);
         const bestVarfor = await getBestVarfor(juara);
         const juaraUmum = await getJuaraUmum(juara);
+        const updated = (await getEvent(eventID)).updatedAt;
 
         setNilaiPeserta(juara);
         setMaxJuaraUmum(juaraUmum);
         setMaxVarfor(bestVarfor);
+        if (updated && updated.seconds) {
+          const updatedDate = new Date(updated.seconds * 1000);
+          setUpdatedAt(updatedDate);
+        } else {
+          setUpdatedAt(null);
+        }
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
         } else {
           setError("Gagal mengambil data nilai.");
         }
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -64,6 +111,7 @@ export default function AccessibleTable({ eventName }: Event) {
   }, [eventID]);
 
   const exportToExcel = () => {
+    setLoadingExport(true);
     const fileName = `Rekap Juara ${eventName}.xlsx`;
 
     // Menyusun header dengan gaya
@@ -274,16 +322,25 @@ export default function AccessibleTable({ eventName }: Event) {
       skipHeader: true,
       origin: "A1",
     });
+
+    // Add the updatedAt date
+    if (updatedAt) {
+      XLSX.utils.sheet_add_aoa(
+        worksheet,
+        [["Diperbarui pada", formatDate(updatedAt)]],
+        { origin: `A${dataToExport.length + 3}` }
+      );
+    }
+
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Juara");
     XLSX.writeFile(workbook, fileName);
+    setLoadingExport(false);
   };
 
   return (
     <section>
-      <Button onClick={exportToExcel} variant="contained" color="primary">
-        Unduh Data
-      </Button>
+      {loading && <LinearProgress color="inherit" />}
       <TableContainer component={Paper} sx={{ width: "100%", boxShadow: 3 }}>
         <Table sx={{ minWidth: 650 }} aria-label="caption table">
           <TableHead sx={{ fontWeight: "bold" }}>
@@ -300,50 +357,93 @@ export default function AccessibleTable({ eventName }: Event) {
             </TableRow>
           </TableHead>
           <TableBody>
-            {nilaiPeserta
-              .sort((a, b) => a.juara - b.juara)
-              .map((row) => (
-                <TableRow key={row.noUrut}>
-                  <TableCell component="th" scope="row" align="center">
-                    {row.noUrut}
-                  </TableCell>
-                  <TableCell align="center">{row.namaTim}</TableCell>
-                  <TableCell align="center">{row.nilai["pbb"]}</TableCell>
-                  <TableCell align="center">{row.nilai["danton"]}</TableCell>
-                  <TableCell align="center">
-                    {row.nilai["pengurangan"]}
-                  </TableCell>
-                  <TableCell align="center">{row.nilai["peringkat"]}</TableCell>
-                  <TableCell align="center">{row.juara}</TableCell>
-                  <TableCell
-                    align="center"
-                    sx={{
-                      backgroundColor:
-                        row.nilai["varfor"] === maxVarfor[2] &&
-                        row.pesertaId === maxVarfor[0]
-                          ? "red"
-                          : "inherit",
-                    }}
-                  >
-                    {row.nilai["varfor"]}
-                  </TableCell>
-                  <TableCell
-                    align="center"
-                    sx={{
-                      backgroundColor:
-                        row.nilai["juaraUmum"] === maxJuaraUmum[2] &&
-                        row.pesertaId === maxJuaraUmum[0]
-                          ? "green"
-                          : "inherit",
-                    }}
-                  >
-                    {row.nilai["juaraUmum"]}
-                  </TableCell>
-                </TableRow>
-              ))}
+            {nilaiPeserta.length === 0 && !loading ? (
+              <TableRow>
+                <TableCell colSpan={9} align="center">
+                  <p className="text-gray-400">Tidak Ada Data</p>
+                </TableCell>
+              </TableRow>
+            ) : (
+              nilaiPeserta
+                .sort((a, b) => a.juara - b.juara)
+                .map((row) => (
+                  <TableRow key={row.noUrut}>
+                    <TableCell component="th" scope="row" align="center">
+                      {row.noUrut}
+                    </TableCell>
+                    <TableCell align="center">{row.namaTim}</TableCell>
+                    <TableCell align="center">{row.nilai["pbb"]}</TableCell>
+                    <TableCell align="center">{row.nilai["danton"]}</TableCell>
+                    <TableCell align="center">
+                      {row.nilai["pengurangan"]}
+                    </TableCell>
+                    <TableCell align="center">
+                      {row.nilai["peringkat"]}
+                    </TableCell>
+                    <TableCell align="center">{row.juara}</TableCell>
+                    <TableCell
+                      align="center"
+                      sx={{
+                        backgroundColor:
+                          row.nilai["varfor"] === maxVarfor[2] &&
+                          row.pesertaId === maxVarfor[0]
+                            ? "#00cc00"
+                            : "inherit",
+                      }}
+                    >
+                      {row.nilai["varfor"]}
+                    </TableCell>
+                    <TableCell
+                      align="center"
+                      sx={{
+                        backgroundColor:
+                          row.nilai["juaraUmum"] === maxJuaraUmum[2] &&
+                          row.pesertaId === maxJuaraUmum[0]
+                            ? "#00cc00"
+                            : "inherit",
+                      }}
+                    >
+                      {row.nilai["juaraUmum"]}
+                    </TableCell>
+                  </TableRow>
+                ))
+            )}
           </TableBody>
+          {updatedAt && (
+            <tfoot>
+              <tr>
+                <td colSpan={9} className="text-center text-red-500">
+                  Diperbarui Pada: {formatDate(updatedAt)}
+                </td>
+              </tr>
+            </tfoot>
+          )}
         </Table>
       </TableContainer>
+      <div className="flex justify-center items-center mt-3">
+        <button
+          type="submit"
+          className="relative w-28 mb-3 inline-flex items-center justify-center overflow-hidden text-sm font-medium text-white rounded group bg-black"
+          onClick={exportToExcel}
+          disabled={!nilaiPeserta || Object.keys(nilaiPeserta).length === 0}
+          style={{
+            cursor:
+              !nilaiPeserta || Object.keys(nilaiPeserta).length === 0
+                ? "not-allowed"
+                : "pointer",
+          }}
+        >
+          {loadingExport ? (
+            <span className="relative px-3 py-2 transition-all ease-in duration-75 group-hover:bg-opacity-0 ">
+              <CircularProgress size="1rem" style={{ color: "#ffffff" }} />
+            </span>
+          ) : (
+            <span className="relative px-3 py-2 transition-all ease-in duration-75 group-hover:bg-opacity-0 ">
+              Unduh Data
+            </span>
+          )}
+        </button>
+      </div>
     </section>
   );
 }

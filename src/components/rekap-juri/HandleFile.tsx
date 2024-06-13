@@ -7,7 +7,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 interface HandleFileProps {
   eventID: string;
   pesertaID: string;
-  noUrut: string;
+  noUrut: number;
 }
 
 const HandleFile: React.FC<HandleFileProps> = ({
@@ -21,7 +21,7 @@ const HandleFile: React.FC<HandleFileProps> = ({
 
   // submit state
   const [excelData, setExcelData] = useState<any[] | null>(null);
-  const [noUrutExcel, setNoUrutExcel] = useState<string[] | null>(null);
+  const [noUrutExcel, setNoUrutExcel] = useState<number[] | null>(null);
 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -56,14 +56,52 @@ const HandleFile: React.FC<HandleFileProps> = ({
       }
     } else {
       setLoadingUpload(false);
-      setTypeError("Silakan pilih berkas.");
+      setTypeError("Silakan pilih berkas yang sesuai dengan template.");
     }
   };
 
   // submit event
+  // const handleFileSubmit = (e: React.FormEvent) => {
+  //   setLoadingUpload(true);
+  //   e.preventDefault();
+  //   if (excelFile !== null) {
+  //     const workbook = XLSX.read(excelFile, { type: "buffer" });
+  //     const worksheetName = workbook.SheetNames[0];
+  //     const worksheet = workbook.Sheets[worksheetName];
+
+  //     // Extracting data from specific rows and columns
+  //     const data = [];
+  //     for (let i = 3; i <= 8; i++) {
+  //       // Rows 3 to 8
+  //       const cellValueA = worksheet[`A${i}`]?.v || "";
+  //       const cellValueB = worksheet[`B${i}`]?.v || "";
+  //       const cellValueC = worksheet[`C${i}`]?.v || "";
+  //       const cellValueD = worksheet[`D${i}`]?.v || 0;
+  //       data.push({
+  //         Deskripsi: `${cellValueA} ${cellValueB} ${cellValueC}`,
+  //         Nilai: cellValueD,
+  //       });
+  //     }
+
+  //     // Extract No Urut from cell B2
+  //     const noUrutValue = worksheet[`B2`]?.v || null;
+  //     setNoUrutExcel(noUrutValue ? noUrutValue : null);
+
+  //     setExcelData(data);
+  //     setLoadingUpload(false);
+  //     setError(null);
+  //   }
+  //   setLoadingUpload(false);
+  // };
+
   const handleFileSubmit = (e: React.FormEvent) => {
     setLoadingUpload(true);
     e.preventDefault();
+    setTypeError(null);
+    setExcelData(null);
+    setNoUrutExcel(null);
+    setError(null);
+
     if (excelFile !== null) {
       const workbook = XLSX.read(excelFile, { type: "buffer" });
       const worksheetName = workbook.SheetNames[0];
@@ -71,6 +109,8 @@ const HandleFile: React.FC<HandleFileProps> = ({
 
       // Extracting data from specific rows and columns
       const data = [];
+      let templateValid = true; // State to track template validity
+
       for (let i = 3; i <= 8; i++) {
         // Rows 3 to 8
         const cellValueA = worksheet[`A${i}`]?.v || "";
@@ -85,18 +125,48 @@ const HandleFile: React.FC<HandleFileProps> = ({
 
       // Extract No Urut from cell B2
       const noUrutValue = worksheet[`B2`]?.v || null;
-      setNoUrutExcel(noUrutValue ? noUrutValue.toString() : null);
+      setNoUrutExcel(noUrutValue ? noUrutValue : null);
+
+      // Check template validity
+      const requiredDescriptions = [
+        "NILAI PBB",
+        "NILAI DANTON",
+        "PENGURANGAN NILAI",
+        "JUARA PERINGKAT",
+        "NILAI VARFOR",
+        "JUARA UMUM",
+      ];
+
+      for (let i = 0; i < requiredDescriptions.length; i++) {
+        if (
+          !data.find(
+            (item) => item.Deskripsi.trim() === requiredDescriptions[i]
+          )
+        ) {
+          templateValid = false;
+          break;
+        }
+      }
+
+      if (!templateValid) {
+        setTypeError("File tidak sesuai template.");
+        setLoadingUpload(false);
+        setExcelFile(null);
+        return;
+      }
 
       setExcelData(data);
       setLoadingUpload(false);
       setError(null);
+    } else {
+      setLoadingUpload(false);
+      setTypeError("Silakan pilih berkas yang sesuai dengan template");
     }
-    setLoadingUpload(false);
   };
 
   const handleSave = async () => {
-    setError(null);
-    if (noUrut !== noUrutExcel[0]) {
+    setTimeout(() => setError(null), 3000);
+    if (noUrut !== noUrutExcel) {
       setError("Nomor urut tidak sama");
       return;
     }
@@ -129,25 +199,10 @@ const HandleFile: React.FC<HandleFileProps> = ({
               break;
           }
         }
-        // Check if nilaiData conforms to the template
-        const requiredFields = [
-          "pbb",
-          "danton",
-          "pengurangan",
-          "peringkat",
-          "varfor",
-          "juaraUmum",
-        ];
-        const missingFields = requiredFields.filter(
-          (field) => !(field in nilaiData)
-        );
-        if (missingFields.length > 0) {
-          throw new Error("File tidak sesuai template.");
-        }
         await saveNilai(eventID, pesertaID, nilaiData);
         await addAllJuara(eventID);
         setSuccess("Data berhasil disimpan.");
-        console.log("berhasil");
+        setTimeout(() => setSuccess(null), 3000);
         setLoadingSave(false);
       } else {
         setLoadingSave(false);
@@ -157,14 +212,13 @@ const HandleFile: React.FC<HandleFileProps> = ({
       setLoadingSave(false);
       setError(error.message);
     }
-    setError(null);
   };
 
   return (
     <section className="mb-3">
       {/* form */}
       <form
-        className="flex flex-row justify-center items-center w-fit gap-2"
+        className="flex flex-col justify-center items-center md:flex-row w-fit gap-2"
         onSubmit={handleFileSubmit}
       >
         <input
@@ -175,7 +229,7 @@ const HandleFile: React.FC<HandleFileProps> = ({
         />
         <button
           type="submit"
-          className="relative inline-flex items-center justify-center mb-1 overflow-hidden text-sm font-medium text-white rounded group bg-black"
+          className="relative w-20 inline-flex items-center justify-center mb-1 overflow-hidden text-sm font-medium text-white rounded group bg-black"
         >
           {loadingUpload ? (
             <span className="relative px-3 py-2 transition-all ease-in duration-75 group-hover:bg-opacity-0 ">
@@ -198,8 +252,10 @@ const HandleFile: React.FC<HandleFileProps> = ({
       <div className="my-3">
         {excelData ? (
           <div>
-            <p className="mb-3 font-bold">No Urut: {noUrutExcel}</p>
-            <table className="w-full border-collapse border border-gray-400 mb-3">
+            <p className="mb-3 font-bold text-red-500">
+              No Urut: {noUrutExcel}
+            </p>
+            <table className="mx-auto w-full border-collapse border border-gray-400 mb-3">
               <thead>
                 <tr>
                   {Object.keys(excelData[0]).map((key) => (
@@ -230,7 +286,7 @@ const HandleFile: React.FC<HandleFileProps> = ({
             <div className="flex justify-center items-center">
               <button
                 type="submit"
-                className="relative inline-flex items-center justify-center mb-1 overflow-hidden text-sm font-medium text-white rounded group bg-black"
+                className="relative w-20 inline-flex items-center justify-center overflow-hidden text-sm font-medium text-white rounded group bg-black"
                 onClick={handleSave}
               >
                 {loadingSave ? (

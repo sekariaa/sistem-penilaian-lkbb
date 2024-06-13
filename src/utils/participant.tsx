@@ -9,9 +9,8 @@ import {
   addDoc,
   getDoc,
   setDoc,
-  Timestamp,
   deleteDoc,
-  DocumentReference,
+  serverTimestamp,
 } from "firebase/firestore";
 import { getCurrentUser } from "./user";
 
@@ -63,15 +62,14 @@ export const addParticipant = async (
       throw new Error("Nomor urut sudah digunakan oleh peserta lain.");
     }
 
-    const timestamp = Timestamp.now();
     //tambahkan peserta
     await addDoc(
       collection(db, `users/${uid}/events/${eventId}/participants`),
       {
         noUrut: noUrut,
         namaTim: namaTim,
-        createdAt: timestamp,
-        updatedAt: timestamp,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       }
     );
   } catch (error) {
@@ -116,7 +114,6 @@ export const editParticipant = async (
       throw new Error("ID peserta tidak ditemukan.");
     }
 
-    const timestamp = Timestamp.now();
     const participantRef = doc(
       db,
       `users/${uid}/events/${eventId}/participants/${pesertaId}`
@@ -125,7 +122,7 @@ export const editParticipant = async (
     // Perbarui dokumen dengan nama tim yang baru
     await setDoc(
       participantRef,
-      { namaTim: newNamaTim, updatedAt: timestamp },
+      { namaTim: newNamaTim, updatedAt: serverTimestamp() },
       { merge: true }
     );
   } catch (error) {
@@ -304,13 +301,18 @@ export const saveNilai = async (
     if (!pesertaDoc.exists()) {
       throw new Error("ID peserta tidak ditemukan.");
     }
+    const dataToSave = {
+      ...nilaiData,
+      updatedAt: serverTimestamp(),
+    };
 
     // Set nilaiData ke dokumen nilai peserta
     const docRef = doc(
       db,
       `users/${uid}/events/${eventId}/participants/${pesertaId}`
     );
-    setDoc(docRef, { nilai: nilaiData }, { merge: true });
+    // setDoc(docRef, { nilai: nilaiData }, { merge: true });
+    await setDoc(docRef, { nilai: dataToSave }, { merge: true });
   } catch (error) {
     if (error instanceof Error) {
       if (
@@ -360,7 +362,8 @@ export const getNilai = async (eventId: string, pesertaId: string) => {
     if (docSnap.exists()) {
       const data = docSnap.data();
       const nilaiData = data.nilai;
-      return nilaiData;
+      const updatedAt = data.nilai.updatedAt;
+      return { nilaiData, updatedAt };
     } else {
       throw new Error("Tidak ada Data. Lakukan upload dokumen!");
     }
@@ -527,16 +530,17 @@ export const addAllJuara = async (eventId: string) => {
           pesertaId: bestVarforId,
           score: bestVarforScore,
         },
+        updatedAt: serverTimestamp(),
       },
       { merge: true }
     );
   } catch (error) {
     if (error instanceof Error) {
       throw new Error(
-        "Gagal menambahkan data juara ke Firestore: " + error.message
+        "Gagal menambahkan data juara ke database: " + error.message
       );
     } else {
-      throw new Error("Gagal menambahkan data juara ke Firestore.");
+      throw new Error("Gagal menambahkan data juara ke database.");
     }
   }
 };

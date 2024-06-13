@@ -12,7 +12,7 @@ import { Button } from "@mui/material";
 const DataNilai = () => {
   const [participant, setParticipant] = useState<{
     pesertaID: string;
-    noUrut: string;
+    noUrut: number;
     namaTim: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -67,7 +67,7 @@ const DataNilai = () => {
                 {participant.namaTim}
               </p>
             </div>
-            <div>
+            <div className="mb-3">
               <Link
                 href={`/event/rekap-juri/${eventID}/data-nilai/${pesertaID}/upload-nilai`}
                 passHref

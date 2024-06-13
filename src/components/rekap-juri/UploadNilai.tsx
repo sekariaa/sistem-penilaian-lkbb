@@ -10,7 +10,7 @@ import HandleFile from "./HandleFile";
 const UploadNilai = () => {
   const [participant, setParticipant] = useState<{
     pesertaID: string;
-    noUrut: string;
+    noUrut: number;
     namaTim: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -30,7 +30,6 @@ const UploadNilai = () => {
         setLoading(false);
       } catch (error) {
         setLoading(false);
-        console.error("Failed to fetch participants:", error);
       }
     };
 
