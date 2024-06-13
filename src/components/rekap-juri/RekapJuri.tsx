@@ -102,10 +102,9 @@ const RekapNilai = () => {
               </Link>
             </div>
           </div>
-
-          <TablePeserta />
         </div>
       )}
+      <TablePeserta />
     </section>
   );
 };

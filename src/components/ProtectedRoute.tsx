@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { useAuth } from "../context/auth";
 import { useRouter } from "next/navigation";
+import CircularProgress from "@mui/material/CircularProgress";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -16,8 +17,8 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
 
   if (loading) {
     return (
-      <div>
-        <p>Loading</p>
+      <div className="flex justify-center items-center h-screen">
+        <CircularProgress style={{ color: "#000000" }} />
       </div>
     );
   }
