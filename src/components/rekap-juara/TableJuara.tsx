@@ -6,7 +6,13 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { getBestVarfor, getJuaraUmum, peringkat } from "@/utils/participant";
+import {
+  getBestVarfor,
+  getJuaraUmum,
+  peringkat,
+  getBestDanton,
+  getBestPBB,
+} from "@/utils/participant";
 import { getEvent } from "@/utils/event";
 import { useParams } from "next/navigation";
 import * as XLSX from "xlsx-js-style";
@@ -71,6 +77,12 @@ export default function AccessibleTable({ eventName }: Event) {
   const [maxVarfor, setMaxVarfor] = React.useState<
     [string | null, string | null, number | null]
   >([null, null, null]);
+  const [maxBestPBB, setMaxBestPBB] = React.useState<
+    [string | null, string | null, number | null]
+  >([null, null, null]);
+  const [maxBestDanton, setMaxBestDanton] = React.useState<
+    [string | null, string | null, number | null]
+  >([null, null, null]);
   const params = useParams();
   const eventID = Array.isArray(params.eventID)
     ? params.eventID[0]
@@ -85,12 +97,16 @@ export default function AccessibleTable({ eventName }: Event) {
         const juara = await peringkat(eventID);
         const bestVarfor = await getBestVarfor(juara);
         const juaraUmum = await getJuaraUmum(juara);
+        const bestPBB = await getBestPBB(juara);
+        const bestDanton = await getBestDanton(juara);
         const updated = (await getEvent(eventID)).updatedAt;
-        console.log(updated);
 
         setNilaiPeserta(juara);
         setMaxJuaraUmum(juaraUmum);
         setMaxVarfor(bestVarfor);
+        setMaxBestPBB(bestPBB);
+        setMaxBestDanton(bestDanton);
+
         if (updated && updated.seconds) {
           const updatedDate = new Date(updated.seconds * 1000);
           setUpdatedAt(updatedDate);
@@ -312,6 +328,42 @@ export default function AccessibleTable({ eventName }: Event) {
           },
         };
       }
+      //pbb
+      if (
+        row.nilai["pbb"] === maxBestPBB[2] &&
+        row.pesertaId === maxBestPBB[0]
+      ) {
+        rowData["Nilai PBB"] = {
+          v: row.nilai["pbb"],
+          s: {
+            fill: { fgColor: { rgb: "00cc00" } },
+            border: {
+              top: { style: "thin", color: { rgb: "000000" } },
+              bottom: { style: "thin", color: { rgb: "000000" } },
+              left: { style: "thin", color: { rgb: "000000" } },
+              right: { style: "thin", color: { rgb: "000000" } },
+            },
+          },
+        };
+      }
+      //danton
+      if (
+        row.nilai["danton"] === maxBestDanton[2] &&
+        row.pesertaId === maxBestDanton[0]
+      ) {
+        rowData["Nilai Danton"] = {
+          v: row.nilai["danton"],
+          s: {
+            fill: { fgColor: { rgb: "00cc00" } },
+            border: {
+              top: { style: "thin", color: { rgb: "000000" } },
+              bottom: { style: "thin", color: { rgb: "000000" } },
+              left: { style: "thin", color: { rgb: "000000" } },
+              right: { style: "thin", color: { rgb: "000000" } },
+            },
+          },
+        };
+      }
       return rowData;
     });
 
@@ -373,8 +425,30 @@ export default function AccessibleTable({ eventName }: Event) {
                       {row.noUrut}
                     </TableCell>
                     <TableCell align="center">{row.namaTim}</TableCell>
-                    <TableCell align="center">{row.nilai["pbb"]}</TableCell>
-                    <TableCell align="center">{row.nilai["danton"]}</TableCell>
+                    <TableCell
+                      align="center"
+                      sx={{
+                        backgroundColor:
+                          row.nilai["pbb"] === maxBestPBB[2] &&
+                          row.pesertaId === maxBestPBB[0]
+                            ? "#00cc00"
+                            : "inherit",
+                      }}
+                    >
+                      {row.nilai["pbb"]}
+                    </TableCell>
+                    <TableCell
+                      align="center"
+                      sx={{
+                        backgroundColor:
+                          row.nilai["danton"] === maxBestDanton[2] &&
+                          row.pesertaId === maxBestDanton[0]
+                            ? "#00cc00"
+                            : "inherit",
+                      }}
+                    >
+                      {row.nilai["danton"]}
+                    </TableCell>
                     <TableCell align="center">
                       {row.nilai["pengurangan"]}
                     </TableCell>

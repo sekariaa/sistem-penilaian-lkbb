@@ -76,7 +76,6 @@ export const peringkat = async (eventId: string): Promise<Peringkat[]> => {
 
     const sortedPeserta: Peringkat[] = allNilai
       .sort((a, b) => {
-        // Custom sorting logic based on Nilai fields
         if (a.nilai.peringkat !== b.nilai.peringkat) {
           return b.nilai.peringkat - a.nilai.peringkat;
         } else if (a.nilai.pbb !== b.nilai.pbb) {

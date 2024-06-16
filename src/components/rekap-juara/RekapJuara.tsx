@@ -27,7 +27,7 @@ const RekapNilai = () => {
           const eventDetails = await getEvent(eventID);
           setEvent(eventDetails);
         } else {
-          console.error("Event ID tidak ditemukan");
+          console.error("Evenet ID tidak ditemukan.");
         }
       } catch (error) {
         console.error("Error fetching event:", error);

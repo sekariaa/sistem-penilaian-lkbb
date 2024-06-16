@@ -496,6 +496,38 @@ export const getBestVarfor = (
   ];
 };
 
+export const getBestPBB = (
+  sortedPeserta: Peringkat[]
+): [string, string, number] => {
+  const sortedpbb = [...sortedPeserta].sort((a, b) => {
+    if (a.nilai.pbb !== b.nilai.pbb) {
+      return b.nilai.pbb - a.nilai.pbb;
+    } else {
+      return a.juara - b.juara;
+    }
+  });
+
+  return [sortedpbb[0].pesertaId, sortedpbb[0].namaTim, sortedpbb[0].nilai.pbb];
+};
+
+export const getBestDanton = (
+  sortedPeserta: Peringkat[]
+): [string, string, number] => {
+  const sortedDanton = [...sortedPeserta].sort((a, b) => {
+    if (a.nilai.danton !== b.nilai.danton) {
+      return b.nilai.danton - a.nilai.danton;
+    } else {
+      return a.juara - b.juara;
+    }
+  });
+
+  return [
+    sortedDanton[0].pesertaId,
+    sortedDanton[0].namaTim,
+    sortedDanton[0].nilai.danton,
+  ];
+};
+
 //masukkan peringkat, getjuaraumum, getbestvarfor kedalam firestor
 export const addAllJuara = async (eventId: string) => {
   try {
@@ -516,6 +548,13 @@ export const addAllJuara = async (eventId: string) => {
     const [bestVarforId, bestVarforTim, bestVarforScore] =
       getBestVarfor(sortedPeserta);
 
+    // best pbb
+    const [bestPBBId, bestPBBTim, bestPBBScore] = getBestPBB(sortedPeserta);
+
+    // best danton
+    const [bestDantonId, bestDantonTim, bestDantonScore] =
+      getBestDanton(sortedPeserta);
+
     // Create a reference to the event document
     const eventDocRef = doc(db, `users/${uid}/events/${eventId}`);
 
@@ -533,6 +572,16 @@ export const addAllJuara = async (eventId: string) => {
           pesertaId: bestVarforId,
           namaTim: bestVarforTim,
           score: bestVarforScore,
+        },
+        bestPBB: {
+          pesertaId: bestPBBId,
+          namaTim: bestPBBTim,
+          score: bestPBBScore,
+        },
+        bestDanton: {
+          pesertaId: bestDantonId,
+          namaTim: bestDantonTim,
+          score: bestDantonScore,
         },
         updatedAt: serverTimestamp(),
       },
@@ -553,6 +602,16 @@ export const addAllJuara = async (eventId: string) => {
           pesertaId: bestVarforId,
           namaTim: bestVarforTim,
           score: bestVarforScore,
+        },
+        bestPBB: {
+          pesertaId: bestPBBId,
+          namaTim: bestPBBTim,
+          score: bestPBBScore,
+        },
+        bestDanton: {
+          pesertaId: bestDantonId,
+          namaTim: bestDantonTim,
+          score: bestDantonScore,
         },
         updatedAt: serverTimestamp(),
       },
