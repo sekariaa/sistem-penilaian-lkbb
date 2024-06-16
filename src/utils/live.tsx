@@ -50,6 +50,8 @@ export const getEvent = async (eventID: string) => {
 
       const bestVarfor = eventData.bestVarfor || {};
       const juaraUmum = eventData.juaraUmum || {};
+      const bestPBB = eventData.bestPBB || {};
+      const bestDanton = eventData.bestDanton || {};
       const peringkat = eventData.peringkat || [];
 
       return {
@@ -57,6 +59,8 @@ export const getEvent = async (eventID: string) => {
         bestVarfor,
         juaraUmum,
         peringkat,
+        bestPBB,
+        bestDanton,
       };
     } else {
       throw new Error("Event tidak ditemukan.");
