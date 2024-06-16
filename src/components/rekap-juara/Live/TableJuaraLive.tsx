@@ -255,7 +255,7 @@ export default function AccessibleTable({ eventName }: Event) {
     ];
 
     const dataToExport = nilaiPeserta.map((row) => {
-      const rowData = {
+      const rowData: any = {
         "Nomor Urut": row.noUrut,
         "Nama Tim": row.namaTim,
         "Nilai PBB": row.nilai["pbb"],

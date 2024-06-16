@@ -331,7 +331,9 @@ export default function EnhancedTable() {
                         </Link>
                         {/* hapus data */}
                         <button
-                          onClick={() => handleDeleteParticipant(row.pesertaID)}
+                          onClick={() =>
+                            handleDeleteParticipant(row.pesertaID as string)
+                          }
                         >
                           <ButtonComponent intent="Hapus"></ButtonComponent>
                         </button>

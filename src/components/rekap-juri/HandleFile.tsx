@@ -21,7 +21,7 @@ const HandleFile: React.FC<HandleFileProps> = ({
 
   // submit state
   const [excelData, setExcelData] = useState<any[] | null>(null);
-  const [noUrutExcel, setNoUrutExcel] = useState<number[] | null>(null);
+  const [noUrutExcel, setNoUrutExcel] = useState<number | null>(null);
 
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);

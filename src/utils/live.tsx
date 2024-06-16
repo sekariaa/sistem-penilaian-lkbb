@@ -39,6 +39,8 @@ export const getEvent = async (eventID: string) => {
     if (docSnap.exists()) {
       const eventData = docSnap.data();
 
+      console.log("halo", eventData);
+
       // Extract basic event details
       const basicEventData = {
         eventID: docSnap.id,
@@ -47,7 +49,6 @@ export const getEvent = async (eventID: string) => {
         level: eventData.level,
         updatedAt: eventData.updatedAt,
       };
-
       const bestVarfor = eventData.bestVarfor || {};
       const juaraUmum = eventData.juaraUmum || {};
       const bestPBB = eventData.bestPBB || {};

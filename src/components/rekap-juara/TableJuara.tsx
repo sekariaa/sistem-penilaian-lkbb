@@ -255,7 +255,7 @@ export default function AccessibleTable({ eventName }: Event) {
     ];
 
     const dataToExport = nilaiPeserta.map((row) => {
-      const rowData = {
+      const rowData: any = {
         "Nomor Urut": row.noUrut,
         "Nama Tim": row.namaTim,
         "Nilai PBB": row.nilai["pbb"],
@@ -269,26 +269,17 @@ export default function AccessibleTable({ eventName }: Event) {
 
       // Menambahkan border ke semua sel
       for (const key in rowData) {
-        if (typeof rowData[key] !== "object" || !rowData[key].s) {
-          rowData[key] = {
-            v: rowData[key],
-            s: {
-              border: {
-                top: { style: "thin", color: { rgb: "000000" } },
-                bottom: { style: "thin", color: { rgb: "000000" } },
-                left: { style: "thin", color: { rgb: "000000" } },
-                right: { style: "thin", color: { rgb: "000000" } },
-              },
+        rowData[key] = {
+          v: rowData[key],
+          s: {
+            border: {
+              top: { style: "thin", color: { rgb: "000000" } },
+              bottom: { style: "thin", color: { rgb: "000000" } },
+              left: { style: "thin", color: { rgb: "000000" } },
+              right: { style: "thin", color: { rgb: "000000" } },
             },
-          };
-        } else {
-          rowData[key].s.border = {
-            top: { style: "thin", color: { rgb: "000000" } },
-            bottom: { style: "thin", color: { rgb: "000000" } },
-            left: { style: "thin", color: { rgb: "000000" } },
-            right: { style: "thin", color: { rgb: "000000" } },
-          };
-        }
+          },
+        };
       }
 
       // Menandai baris dengan juara umum tertinggi dengan latar belakang hijau
