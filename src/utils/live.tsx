@@ -132,3 +132,35 @@ export const getBestVarfor = (
     sortedVarfor[0].nilai.varfor,
   ];
 };
+
+export const getBestPBB = (
+  sortedPeserta: Peringkat[]
+): [string, string, number] => {
+  const sortedpbb = [...sortedPeserta].sort((a, b) => {
+    if (a.nilai.pbb !== b.nilai.pbb) {
+      return b.nilai.pbb - a.nilai.pbb;
+    } else {
+      return a.juara - b.juara;
+    }
+  });
+
+  return [sortedpbb[0].pesertaId, sortedpbb[0].namaTim, sortedpbb[0].nilai.pbb];
+};
+
+export const getBestDanton = (
+  sortedPeserta: Peringkat[]
+): [string, string, number] => {
+  const sortedDanton = [...sortedPeserta].sort((a, b) => {
+    if (a.nilai.danton !== b.nilai.danton) {
+      return b.nilai.danton - a.nilai.danton;
+    } else {
+      return a.juara - b.juara;
+    }
+  });
+
+  return [
+    sortedDanton[0].pesertaId,
+    sortedDanton[0].namaTim,
+    sortedDanton[0].nilai.danton,
+  ];
+};

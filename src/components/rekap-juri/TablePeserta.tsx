@@ -19,6 +19,7 @@ import {
 import LinearProgress from "@mui/material/LinearProgress";
 import ButtonComponent from "./ButtonComponent";
 import Link from "next/link";
+import TextField from "@mui/material/TextField";
 
 interface Data {
   pesertaID: string;
@@ -166,6 +167,7 @@ export default function EnhancedTable() {
   const eventID = Array.isArray(params.eventID)
     ? params.eventID[0]
     : params.eventID;
+  const [searched, setSearched] = React.useState<string>("");
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -233,17 +235,56 @@ export default function EnhancedTable() {
     }
   };
 
-  const visibleRows = React.useMemo(
-    () =>
-      stableSort(participants, getComparator(order, orderBy)).slice(
-        page * rowsPerPage,
-        page * rowsPerPage + rowsPerPage
-      ),
-    [order, orderBy, page, rowsPerPage, participants]
-  );
+  const visibleRows = React.useMemo(() => {
+    const filteredParticipants = participants.filter((row) =>
+      row.namaTim.toLowerCase().includes(searched.toLowerCase())
+    );
+    const pageCount = Math.ceil(filteredParticipants.length / rowsPerPage);
+    const adjustedPage = Math.min(page, pageCount - 1);
+    return stableSort(
+      filteredParticipants,
+      getComparator(order, orderBy)
+    ).slice(
+      adjustedPage * rowsPerPage,
+      adjustedPage * rowsPerPage + rowsPerPage
+    );
+  }, [order, orderBy, page, rowsPerPage, participants, searched]);
+
+  const requestSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearched(event.target.value);
+  };
+
+  const cancelSearch = () => {
+    setSearched("");
+  };
 
   return (
     <Box sx={{ width: "100%", boxShadow: 3 }}>
+      <TextField
+        label="Cari Nama Tim"
+        value={searched}
+        onChange={requestSearch}
+        size="small"
+        sx={{
+          width: "100%",
+          "& .MuiInputBase-input": {
+            color: "#000000",
+          },
+          "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
+            borderColor: "#000000",
+          },
+          "& .MuiInputLabel-root": {
+            color: "#000000",
+          },
+          "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
+            {
+              borderColor: "#000000",
+            },
+          "& .MuiInputLabel-root.Mui-focused": {
+            color: "#000000",
+          },
+        }}
+      />
       {loading && <LinearProgress color="inherit" />}
       <Paper sx={{ width: "100%", mb: 2 }}>
         <TableContainer>
@@ -259,7 +300,7 @@ export default function EnhancedTable() {
               rowCount={participants.length}
             />
             <TableBody>
-              {!loading && participants.length > 0
+              {!loading && visibleRows.length > 0
                 ? visibleRows.map((row) => (
                     <TableRow
                       key={row.noUrut}
