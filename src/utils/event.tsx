@@ -15,39 +15,6 @@ import { getCurrentUser } from "./user";
 
 export const db = getFirestore();
 
-//add event by uid
-// export const addevent = async (
-//   eventName: string,
-//   organizer: string,
-//   level: string
-// ) => {
-//   let docRef1;
-//   try {
-//     const currentUser = getCurrentUser();
-//     if (currentUser) {
-//       const uid = currentUser.uid;
-//       docRef1 = await addDoc(collection(db, `users/${uid}/events`), {
-//         name: eventName,
-//         createdAt: new Date(),
-//         organizer: organizer,
-//         level: level,
-//       });
-//     } else {
-//       throw new Error("Pengguna tidak ditemukan.");
-//     }
-//     //tanpa user
-//     const eventId = docRef1.id;
-//     await addDoc(collection(db, `events/${eventId}`), {
-//       name: eventName,
-//       createdAt: new Date(),
-//       organizer: organizer,
-//       level: level,
-//     });
-//   } catch (error) {
-//     throw new Error("Gagal menambahkan event.");
-//   }
-// };
-
 export const addevent = async (
   eventName: string,
   organizer: string,
