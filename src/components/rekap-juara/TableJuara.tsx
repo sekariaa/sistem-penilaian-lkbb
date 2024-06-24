@@ -74,15 +74,15 @@ export default function AccessibleTable({ eventName }: Event) {
   const [maxJuaraUmum, setMaxJuaraUmum] = React.useState<
     [string | null, string | null, number | null]
   >([null, null, null]);
-  const [maxVarfor, setMaxVarfor] = React.useState<
-    [string | null, string | null, number | null]
-  >([null, null, null]);
+  const [maxVarfor, setMaxVarfor] = React.useState<[string, string, number][]>(
+    []
+  );
   const [maxBestPBB, setMaxBestPBB] = React.useState<
-    [string | null, string | null, number | null]
-  >([null, null, null]);
+    [string, string, number][]
+  >([]);
   const [maxBestDanton, setMaxBestDanton] = React.useState<
-    [string | null, string | null, number | null]
-  >([null, null, null]);
+    [string, string, number][]
+  >([]);
   const params = useParams();
   const eventID = Array.isArray(params.eventID)
     ? params.eventID[0]
@@ -127,129 +127,99 @@ export default function AccessibleTable({ eventName }: Event) {
     fetchData();
   }, [eventID]);
 
+  const getBestDantonValue = (pesertaId: string) => {
+    const value = maxBestDanton.find((danton) => danton[0] === pesertaId)
+      ? maxBestDanton.findIndex((danton) => danton[0] === pesertaId) + 1
+      : "-";
+    return value;
+  };
+
+  const getBestPBBValue = (pesertaId: string) => {
+    const value = maxBestPBB.find((pbb) => pbb[0] === pesertaId)
+      ? maxBestPBB.findIndex((pbb) => pbb[0] === pesertaId) + 1
+      : "-";
+    return value;
+  };
+
+  const getBestVarforValue = (pesertaId: string) => {
+    const value = maxVarfor.find((varfor) => varfor[0] === pesertaId)
+      ? maxVarfor.findIndex((varfor) => varfor[0] === pesertaId) + 1
+      : "-";
+    return value;
+  };
+
   const exportToExcel = () => {
     setLoadingExport(true);
     const fileName = `Rekap Juara ${eventName}.xlsx`;
+    const headerStyle = {
+      font: { bold: true },
+      fill: { fgColor: { rgb: "CCCCCC" } },
+      border: {
+        top: { style: "thin", color: { rgb: "000000" } },
+        bottom: { style: "thin", color: { rgb: "000000" } },
+        left: { style: "thin", color: { rgb: "000000" } },
+        right: { style: "thin", color: { rgb: "000000" } },
+      },
+    };
+    const bodyStyle = {
+      border: {
+        top: { style: "thin", color: { rgb: "000000" } },
+        bottom: { style: "thin", color: { rgb: "000000" } },
+        left: { style: "thin", color: { rgb: "000000" } },
+        right: { style: "thin", color: { rgb: "000000" } },
+      },
+    };
 
     // Menyusun header dengan gaya
     const header = [
       {
         "Nomor Urut": {
           v: "Nomor Urut",
-          s: {
-            font: { bold: true },
-            fill: { fgColor: { rgb: "CCCCCC" } },
-            border: {
-              top: { style: "thin", color: { rgb: "000000" } },
-              bottom: { style: "thin", color: { rgb: "000000" } },
-              left: { style: "thin", color: { rgb: "000000" } },
-              right: { style: "thin", color: { rgb: "000000" } },
-            },
-          },
+          s: headerStyle,
         },
         "Nama Tim": {
           v: "Nama Tim",
-          s: {
-            font: { bold: true },
-            fill: { fgColor: { rgb: "CCCCCC" } },
-            border: {
-              top: { style: "thin", color: { rgb: "000000" } },
-              bottom: { style: "thin", color: { rgb: "000000" } },
-              left: { style: "thin", color: { rgb: "000000" } },
-              right: { style: "thin", color: { rgb: "000000" } },
-            },
-          },
+          s: headerStyle,
         },
         "Nilai PBB": {
           v: "Nilai PBB",
-          s: {
-            font: { bold: true },
-            fill: { fgColor: { rgb: "CCCCCC" } },
-            border: {
-              top: { style: "thin", color: { rgb: "000000" } },
-              bottom: { style: "thin", color: { rgb: "000000" } },
-              left: { style: "thin", color: { rgb: "000000" } },
-              right: { style: "thin", color: { rgb: "000000" } },
-            },
-          },
+          s: headerStyle,
         },
         "Nilai Danton": {
           v: "Nilai Danton",
-          s: {
-            font: { bold: true },
-            fill: { fgColor: { rgb: "CCCCCC" } },
-            border: {
-              top: { style: "thin", color: { rgb: "000000" } },
-              bottom: { style: "thin", color: { rgb: "000000" } },
-              left: { style: "thin", color: { rgb: "000000" } },
-              right: { style: "thin", color: { rgb: "000000" } },
-            },
-          },
+          s: headerStyle,
         },
         "Pengurangan Nilai": {
           v: "Pengurangan Nilai",
-          s: {
-            font: { bold: true },
-            fill: { fgColor: { rgb: "CCCCCC" } },
-            border: {
-              top: { style: "thin", color: { rgb: "000000" } },
-              bottom: { style: "thin", color: { rgb: "000000" } },
-              left: { style: "thin", color: { rgb: "000000" } },
-              right: { style: "thin", color: { rgb: "000000" } },
-            },
-          },
+          s: headerStyle,
         },
         "Juara Peringkat": {
           v: "Juara Peringkat",
-          s: {
-            font: { bold: true },
-            fill: { fgColor: { rgb: "CCCCCC" } },
-            border: {
-              top: { style: "thin", color: { rgb: "000000" } },
-              bottom: { style: "thin", color: { rgb: "000000" } },
-              left: { style: "thin", color: { rgb: "000000" } },
-              right: { style: "thin", color: { rgb: "000000" } },
-            },
-          },
-        },
-        Juara: {
-          v: "Juara",
-          s: {
-            font: { bold: true },
-            fill: { fgColor: { rgb: "CCCCCC" } },
-            border: {
-              top: { style: "thin", color: { rgb: "000000" } },
-              bottom: { style: "thin", color: { rgb: "000000" } },
-              left: { style: "thin", color: { rgb: "000000" } },
-              right: { style: "thin", color: { rgb: "000000" } },
-            },
-          },
+          s: headerStyle,
         },
         "Nilai Varfor": {
           v: "Nilai Varfor",
-          s: {
-            font: { bold: true },
-            fill: { fgColor: { rgb: "CCCCCC" } },
-            border: {
-              top: { style: "thin", color: { rgb: "000000" } },
-              bottom: { style: "thin", color: { rgb: "000000" } },
-              left: { style: "thin", color: { rgb: "000000" } },
-              right: { style: "thin", color: { rgb: "000000" } },
-            },
-          },
+          s: headerStyle,
         },
         "Juara Umum": {
           v: "Juara Umum",
-          s: {
-            font: { bold: true },
-            fill: { fgColor: { rgb: "CCCCCC" } },
-            border: {
-              top: { style: "thin", color: { rgb: "000000" } },
-              bottom: { style: "thin", color: { rgb: "000000" } },
-              left: { style: "thin", color: { rgb: "000000" } },
-              right: { style: "thin", color: { rgb: "000000" } },
-            },
-          },
+          s: headerStyle,
+        },
+        Juara: {
+          v: "Juara",
+          s: headerStyle,
+        },
+        "Best PBB": {
+          v: "Best PBB",
+          s: headerStyle,
+        },
+        "Best Danton": {
+          v: "Best Danton",
+          s: headerStyle,
+        },
+        "Best Varfor": {
+          v: "Best Varfor",
+          s: headerStyle,
         },
       },
     ];
@@ -262,96 +232,59 @@ export default function AccessibleTable({ eventName }: Event) {
         "Nilai Danton": row.nilai["danton"],
         "Pengurangan Nilai": row.nilai["pengurangan"],
         "Juara Peringkat": row.nilai["peringkat"],
-        Juara: row.juara,
         "Nilai Varfor": row.nilai["varfor"],
         "Juara Umum": row.nilai["juaraUmum"],
+        Juara: row.juara,
+        "Best PBB": getBestPBBValue(row.pesertaId),
+        "Best Danton": getBestDantonValue(row.pesertaId),
+        "Best Varfor": getBestVarforValue(row.pesertaId),
       };
 
       // Menambahkan border ke semua sel
       for (const key in rowData) {
         rowData[key] = {
           v: rowData[key],
-          s: {
-            border: {
-              top: { style: "thin", color: { rgb: "000000" } },
-              bottom: { style: "thin", color: { rgb: "000000" } },
-              left: { style: "thin", color: { rgb: "000000" } },
-              right: { style: "thin", color: { rgb: "000000" } },
-            },
-          },
+          s: bodyStyle,
         };
       }
 
-      // Menandai baris dengan juara umum tertinggi dengan latar belakang hijau
-      if (
-        row.nilai["juaraUmum"] === maxJuaraUmum[2] &&
-        row.pesertaId === maxJuaraUmum[0]
-      ) {
-        rowData["Juara Umum"] = {
-          v: row.nilai["juaraUmum"],
-          s: {
-            fill: { fgColor: { rgb: "00cc00" } },
-            border: {
-              top: { style: "thin", color: { rgb: "000000" } },
-              bottom: { style: "thin", color: { rgb: "000000" } },
-              left: { style: "thin", color: { rgb: "000000" } },
-              right: { style: "thin", color: { rgb: "000000" } },
-            },
-          },
-        };
-      }
-
-      // Menandai baris dengan varfor tertinggi dengan latar belakang hijau
-      if (
-        row.nilai["varfor"] === maxVarfor[2] &&
-        row.pesertaId === maxVarfor[0]
-      ) {
-        rowData["Nilai Varfor"] = {
-          v: row.nilai["varfor"],
-          s: {
-            fill: { fgColor: { rgb: "00cc00" } },
-            border: {
-              top: { style: "thin", color: { rgb: "000000" } },
-              bottom: { style: "thin", color: { rgb: "000000" } },
-              left: { style: "thin", color: { rgb: "000000" } },
-              right: { style: "thin", color: { rgb: "000000" } },
-            },
-          },
-        };
-      }
-      //pbb
-      if (
-        row.nilai["pbb"] === maxBestPBB[2] &&
-        row.pesertaId === maxBestPBB[0]
-      ) {
+      // Menandai baris dengan pbb tertinggi
+      if (maxBestPBB.find((pbb) => pbb[0] === row.pesertaId)) {
         rowData["Nilai PBB"] = {
           v: row.nilai["pbb"],
           s: {
-            fill: { fgColor: { rgb: "00cc00" } },
-            border: {
-              top: { style: "thin", color: { rgb: "000000" } },
-              bottom: { style: "thin", color: { rgb: "000000" } },
-              left: { style: "thin", color: { rgb: "000000" } },
-              right: { style: "thin", color: { rgb: "000000" } },
-            },
+            ...bodyStyle,
+            fill: { fgColor: { rgb: "F8F633" } },
           },
         };
       }
-      //danton
-      if (
-        row.nilai["danton"] === maxBestDanton[2] &&
-        row.pesertaId === maxBestDanton[0]
-      ) {
+      // Menandai baris dengan danton tertinggi
+      if (maxBestDanton.find((danton) => danton[0] === row.pesertaId)) {
         rowData["Nilai Danton"] = {
           v: row.nilai["danton"],
           s: {
-            fill: { fgColor: { rgb: "00cc00" } },
-            border: {
-              top: { style: "thin", color: { rgb: "000000" } },
-              bottom: { style: "thin", color: { rgb: "000000" } },
-              left: { style: "thin", color: { rgb: "000000" } },
-              right: { style: "thin", color: { rgb: "000000" } },
-            },
+            ...bodyStyle,
+            fill: { fgColor: { rgb: "4C9CFF" } },
+          },
+        };
+      }
+      // Menandai baris dengan varfor tertinggi
+      if (maxVarfor.find((varfor) => varfor[0] === row.pesertaId)) {
+        rowData["Nilai Varfor"] = {
+          v: row.nilai["varfor"],
+          s: {
+            ...bodyStyle,
+            fill: { fgColor: { rgb: "F0A537" } },
+          },
+        };
+      }
+      // Menandai baris dengan juara umum tertinggi
+      if (row.pesertaId === maxJuaraUmum[0]) {
+        rowData["Juara Umum"] = {
+          v: row.nilai["juaraUmum"],
+          s: {
+            ...bodyStyle,
+            fill: { fgColor: { rgb: "0CE42A" } },
           },
         };
       }
@@ -386,18 +319,37 @@ export default function AccessibleTable({ eventName }: Event) {
     <section>
       {loading && <LinearProgress color="inherit" />}
       <TableContainer component={Paper} sx={{ width: "100%", boxShadow: 3 }}>
-        <Table sx={{ minWidth: 650 }} aria-label="caption table">
+        <Table sx={{ minWidth: 650 }} size="small" aria-label="caption table">
           <TableHead sx={{ fontWeight: "bold" }}>
             <TableRow>
-              <TableCell align="center">Nomor Urut</TableCell>
-              <TableCell align="center">Nama Tim</TableCell>
-              <TableCell align="center">Nilai PBB</TableCell>
-              <TableCell align="center">Nilai Danton</TableCell>
-              <TableCell align="center">Pengurangan Nilai</TableCell>
-              <TableCell align="center">Juara Peringkat</TableCell>
+              <TableCell align="center" rowSpan={2}>
+                No Urut
+              </TableCell>
+              <TableCell align="center" rowSpan={2}>
+                Nama Tim
+              </TableCell>
+              <TableCell align="center" rowSpan={2}>
+                Nilai PBB
+              </TableCell>
+              <TableCell align="center" rowSpan={2}>
+                Nilai Danton
+              </TableCell>
+              <TableCell align="center" rowSpan={2}>
+                Pengurangan Nilai
+              </TableCell>
+              <TableCell align="center" rowSpan={2}>
+                Juara Peringkat
+              </TableCell>
+              <TableCell align="center" rowSpan={2}>
+                Nilai Varfor
+              </TableCell>
+              <TableCell align="center" rowSpan={2}>
+                Juara Umum
+              </TableCell>
               <TableCell align="center">Juara</TableCell>
-              <TableCell align="center">Nilai Varfor</TableCell>
-              <TableCell align="center">Juara Umum</TableCell>
+              <TableCell align="center">Best PBB</TableCell>
+              <TableCell align="center">Best Danton</TableCell>
+              <TableCell align="center">Best Varfor</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -419,11 +371,11 @@ export default function AccessibleTable({ eventName }: Event) {
                     <TableCell
                       align="center"
                       sx={{
-                        backgroundColor:
-                          row.nilai["pbb"] === maxBestPBB[2] &&
-                          row.pesertaId === maxBestPBB[0]
-                            ? "#00cc00"
-                            : "inherit",
+                        backgroundColor: maxBestPBB.find(
+                          (pbb) => pbb[0] === row.pesertaId
+                        )
+                          ? "#F8F633"
+                          : "inherit",
                       }}
                     >
                       {row.nilai["pbb"]}
@@ -431,11 +383,11 @@ export default function AccessibleTable({ eventName }: Event) {
                     <TableCell
                       align="center"
                       sx={{
-                        backgroundColor:
-                          row.nilai["danton"] === maxBestDanton[2] &&
-                          row.pesertaId === maxBestDanton[0]
-                            ? "#00cc00"
-                            : "inherit",
+                        backgroundColor: maxBestDanton.find(
+                          (danton) => danton[0] === row.pesertaId
+                        )
+                          ? "#4C9CFF"
+                          : "inherit",
                       }}
                     >
                       {row.nilai["danton"]}
@@ -446,15 +398,14 @@ export default function AccessibleTable({ eventName }: Event) {
                     <TableCell align="center">
                       {row.nilai["peringkat"]}
                     </TableCell>
-                    <TableCell align="center">{row.juara}</TableCell>
                     <TableCell
                       align="center"
                       sx={{
-                        backgroundColor:
-                          row.nilai["varfor"] === maxVarfor[2] &&
-                          row.pesertaId === maxVarfor[0]
-                            ? "#00cc00"
-                            : "inherit",
+                        backgroundColor: maxVarfor.find(
+                          (varfor) => varfor[0] === row.pesertaId
+                        )
+                          ? "#F0A537"
+                          : "inherit",
                       }}
                     >
                       {row.nilai["varfor"]}
@@ -463,27 +414,34 @@ export default function AccessibleTable({ eventName }: Event) {
                       align="center"
                       sx={{
                         backgroundColor:
-                          row.nilai["juaraUmum"] === maxJuaraUmum[2] &&
                           row.pesertaId === maxJuaraUmum[0]
-                            ? "#00cc00"
+                            ? "#0CE42A"
                             : "inherit",
                       }}
                     >
                       {row.nilai["juaraUmum"]}
                     </TableCell>
+                    <TableCell align="center">{row.juara}</TableCell>
+                    <TableCell align="center">
+                      {getBestPBBValue(row.pesertaId)}
+                    </TableCell>
+                    <TableCell align="center">
+                      {getBestDantonValue(row.pesertaId)}
+                    </TableCell>
+                    <TableCell align="center">
+                      {getBestVarforValue(row.pesertaId)}
+                    </TableCell>
                   </TableRow>
                 ))
             )}
-          </TableBody>
-          {updatedAt && (
-            <tfoot>
-              <tr>
-                <td colSpan={9} className="text-center text-red-500">
+            {updatedAt && (
+              <TableRow>
+                <TableCell colSpan={12} className="text-center text-red-500">
                   Diperbarui Pada: {formatDate(updatedAt)}
-                </td>
-              </tr>
-            </tfoot>
-          )}
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
         </Table>
       </TableContainer>
       <div className="flex justify-center items-center mt-3">

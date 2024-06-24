@@ -1,74 +1,77 @@
-import React, { useEffect, useState } from "react";
-import {
-  peringkat,
-  getBestVarfor,
-  getJuaraUmum,
-  addAllJuara,
-} from "@/utils/participant";
+import * as React from "react";
+import Table from "@mui/material/Table";
+import TableBody from "@mui/material/TableBody";
+import TableCell from "@mui/material/TableCell";
+import TableContainer from "@mui/material/TableContainer";
+import TableHead from "@mui/material/TableHead";
+import TableRow from "@mui/material/TableRow";
+import Paper from "@mui/material/Paper";
 
-interface Nilai {
-  peringkat: number;
-  pbb: number;
-  danton: number;
-  pengurangan: number;
-  juaraUmum: number;
-  varfor: number;
-}
-
-interface Peringkat {
-  pesertaId: string;
-  nilai: Nilai;
-  namaTim: string;
-  noUrut: string;
-  juara: number;
-}
-
-const Test = () => {
-  const [peringkatData, setPeringkatData] = useState<Peringkat[]>([]);
-  const [error, setError] = useState<string>("");
-  const id = "0vI9yhK1EVIHPqhgg1Ms";
-
-  useEffect(() => {
-    const fetchPeringkat = async () => {
-      try {
-        const data = await peringkat(id);
-        const xxx = await getBestVarfor(data);
-        const yyy = await getJuaraUmum(data);
-        console.log("juara", data);
-        console.log("varfor", xxx);
-        console.log("umum", yyy);
-        // setPeringkatData(data);
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("Gagal mengambil data peringkat.");
-        }
-      }
-    };
-
-    fetchPeringkat();
-  }, []);
-
-  const handleClick = async () => {
-    try {
-      await addAllJuara(id);
-      console.log("Data juara berhasil ditambahkan.");
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Gagal menambahkan data juara.");
-      }
-    }
-  };
-
+export default function AccessibleTable() {
   return (
-    <div>
-      <h1>Test</h1>
-      <button onClick={handleClick}>HALO</button>
-    </div>
-  );
-};
+    <section>
+      <TableContainer component={Paper} sx={{ width: "100%", boxShadow: 3 }}>
+        <Table sx={{ minWidth: 650 }} aria-label="caption table">
+          <TableHead sx={{ fontWeight: "bold" }}>
+            <TableRow className="bg-yellow-500">
+              <TableCell align="center" rowSpan={2}>
+                No Urut
+              </TableCell>
+              <TableCell align="center" rowSpan={2}>
+                Nama Tim
+              </TableCell>
+              <TableCell align="center" rowSpan={2}>
+                Nilai PBB
+              </TableCell>
+              <TableCell align="center" rowSpan={2}>
+                Nilai Danton
+              </TableCell>
+              <TableCell align="center" rowSpan={2}>
+                Pengurangan Nilai
+              </TableCell>
+              <TableCell align="center" rowSpan={2}>
+                Juara Peringkat
+              </TableCell>
+              <TableCell align="center" rowSpan={2}>
+                Nilai Varfor
+              </TableCell>
+              <TableCell align="center" rowSpan={2}>
+                Juara Umum
+              </TableCell>
+              <TableCell align="center" colSpan={4} className="bg-blue-500">
+                Hasil
+              </TableCell>
+            </TableRow>
+            <TableRow className="bg-purple-500">
+              <TableCell align="center" className="bg-fuchsia-500">
+                Juara
+              </TableCell>
+              <TableCell align="center">Best Varfor</TableCell>
+              <TableCell align="center">Best PBB</TableCell>
+              <TableCell align="center">Best Danton</TableCell>
+            </TableRow>
+          </TableHead>
 
-export default Test;
+          <TableBody>
+            <TableRow>
+              <TableCell component="th" scope="row" align="center">
+                a
+              </TableCell>
+              <TableCell align="center">b</TableCell>
+              <TableCell align="center">c</TableCell>
+              <TableCell align="center">d</TableCell>
+              <TableCell align="center">e</TableCell>
+              <TableCell align="center">f</TableCell>
+              <TableCell align="center">g</TableCell>
+              <TableCell align="center">h</TableCell>
+              <TableCell align="center">i</TableCell>
+              <TableCell align="center">j</TableCell>
+              <TableCell align="center">k</TableCell>
+              <TableCell align="center">l</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </section>
+  );
+}

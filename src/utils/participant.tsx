@@ -480,7 +480,7 @@ export const getJuaraUmum = (
 
 export const getBestVarfor = (
   sortedPeserta: Peringkat[]
-): [string, string, number] => {
+): [string, string, number][] => {
   const sortedVarfor = [...sortedPeserta].sort((a, b) => {
     if (a.nilai.varfor !== b.nilai.varfor) {
       return b.nilai.varfor - a.nilai.varfor;
@@ -489,16 +489,20 @@ export const getBestVarfor = (
     }
   });
 
-  return [
-    sortedVarfor[0].pesertaId,
-    sortedVarfor[0].namaTim,
-    sortedVarfor[0].nilai.varfor,
-  ];
+  // // Get the top 10 entries
+  const top10 = sortedVarfor.slice(0, 10);
+
+  // // Map the top 10 entries to the required format
+  return top10.map((entry) => [
+    entry.pesertaId,
+    entry.namaTim,
+    entry.nilai.varfor,
+  ]);
 };
 
 export const getBestPBB = (
   sortedPeserta: Peringkat[]
-): [string, string, number] => {
+): [string, string, number][] => {
   const sortedpbb = [...sortedPeserta].sort((a, b) => {
     if (a.nilai.pbb !== b.nilai.pbb) {
       return b.nilai.pbb - a.nilai.pbb;
@@ -507,12 +511,20 @@ export const getBestPBB = (
     }
   });
 
-  return [sortedpbb[0].pesertaId, sortedpbb[0].namaTim, sortedpbb[0].nilai.pbb];
+  // // Get the top 10 entries
+  const top10 = sortedpbb.slice(0, 3);
+
+  // // Map the top 10 entries to the required format
+  return top10.map((entry) => [
+    entry.pesertaId,
+    entry.namaTim,
+    entry.nilai.pbb,
+  ]);
 };
 
 export const getBestDanton = (
   sortedPeserta: Peringkat[]
-): [string, string, number] => {
+): [string, string, number][] => {
   const sortedDanton = [...sortedPeserta].sort((a, b) => {
     if (a.nilai.danton !== b.nilai.danton) {
       return b.nilai.danton - a.nilai.danton;
@@ -521,14 +533,18 @@ export const getBestDanton = (
     }
   });
 
-  return [
-    sortedDanton[0].pesertaId,
-    sortedDanton[0].namaTim,
-    sortedDanton[0].nilai.danton,
-  ];
+  // // Get the top 10 entries
+  const top10 = sortedDanton.slice(0, 3);
+
+  // // Map the top 10 entries to the required format
+  return top10.map((entry) => [
+    entry.pesertaId,
+    entry.namaTim,
+    entry.nilai.danton,
+  ]);
 };
 
-//masukkan peringkat, getjuaraumum, getbestvarfor kedalam firestor
+//masukkan peringkat, getjuaraumum, getbestvarfor kedalam firestore
 export const addAllJuara = async (eventId: string) => {
   try {
     const currentUser = getCurrentUser();
@@ -544,16 +560,25 @@ export const addAllJuara = async (eventId: string) => {
     const [juaraUmumId, juaraUmumTim, juaraUmumScore] =
       getJuaraUmum(sortedPeserta);
 
+    // // Determine best varfor
+    // const [bestVarforId, bestVarforTim, bestVarforScore] =
+    //   getBestVarfor(sortedPeserta);
+
+    // // best pbb
+    // const [bestPBBId, bestPBBTim, bestPBBScore] = getBestPBB(sortedPeserta);
+
+    // // best danton
+    // const [bestDantonId, bestDantonTim, bestDantonScore] =
+    //   getBestDanton(sortedPeserta);
+
     // Determine best varfor
-    const [bestVarforId, bestVarforTim, bestVarforScore] =
-      getBestVarfor(sortedPeserta);
+    const bestVarfor = getBestVarfor(sortedPeserta);
 
-    // best pbb
-    const [bestPBBId, bestPBBTim, bestPBBScore] = getBestPBB(sortedPeserta);
+    // Determine best PBB
+    const bestPBB = getBestPBB(sortedPeserta);
 
-    // best danton
-    const [bestDantonId, bestDantonTim, bestDantonScore] =
-      getBestDanton(sortedPeserta);
+    // Determine best Danton
+    const bestDanton = getBestDanton(sortedPeserta);
 
     // Create a reference to the event document
     const eventDocRef = doc(db, `users/${uid}/events/${eventId}`);
@@ -568,21 +593,21 @@ export const addAllJuara = async (eventId: string) => {
           namaTim: juaraUmumTim,
           score: juaraUmumScore,
         },
-        bestVarfor: {
-          pesertaId: bestVarforId,
-          namaTim: bestVarforTim,
-          score: bestVarforScore,
-        },
-        bestPBB: {
-          pesertaId: bestPBBId,
-          namaTim: bestPBBTim,
-          score: bestPBBScore,
-        },
-        bestDanton: {
-          pesertaId: bestDantonId,
-          namaTim: bestDantonTim,
-          score: bestDantonScore,
-        },
+        bestVarfor: bestVarfor.map(([pesertaId, namaTim, score]) => ({
+          pesertaId,
+          namaTim,
+          score,
+        })),
+        bestPBB: bestPBB.map(([pesertaId, namaTim, score]) => ({
+          pesertaId,
+          namaTim,
+          score,
+        })),
+        bestDanton: bestDanton.map(([pesertaId, namaTim, score]) => ({
+          pesertaId,
+          namaTim,
+          score,
+        })),
         updatedAt: serverTimestamp(),
       },
       { merge: true }
@@ -598,21 +623,21 @@ export const addAllJuara = async (eventId: string) => {
           namaTim: juaraUmumTim,
           score: juaraUmumScore,
         },
-        bestVarfor: {
-          pesertaId: bestVarforId,
-          namaTim: bestVarforTim,
-          score: bestVarforScore,
-        },
-        bestPBB: {
-          pesertaId: bestPBBId,
-          namaTim: bestPBBTim,
-          score: bestPBBScore,
-        },
-        bestDanton: {
-          pesertaId: bestDantonId,
-          namaTim: bestDantonTim,
-          score: bestDantonScore,
-        },
+        bestVarfor: bestVarfor.map(([pesertaId, namaTim, score]) => ({
+          pesertaId,
+          namaTim,
+          score,
+        })),
+        bestPBB: bestPBB.map(([pesertaId, namaTim, score]) => ({
+          pesertaId,
+          namaTim,
+          score,
+        })),
+        bestDanton: bestDanton.map(([pesertaId, namaTim, score]) => ({
+          pesertaId,
+          namaTim,
+          score,
+        })),
         updatedAt: serverTimestamp(),
       },
       { merge: true }

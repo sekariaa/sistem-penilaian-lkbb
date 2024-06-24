@@ -39,8 +39,6 @@ export const getEvent = async (eventID: string) => {
     if (docSnap.exists()) {
       const eventData = docSnap.data();
 
-      console.log("halo", eventData);
-
       // Extract basic event details
       const basicEventData = {
         eventID: docSnap.id,
@@ -122,7 +120,7 @@ export const getJuaraUmum = (
 
 export const getBestVarfor = (
   sortedPeserta: Peringkat[]
-): [string, string, number] => {
+): [string, string, number][] => {
   const sortedVarfor = [...sortedPeserta].sort((a, b) => {
     if (a.nilai.varfor !== b.nilai.varfor) {
       return b.nilai.varfor - a.nilai.varfor;
@@ -131,16 +129,20 @@ export const getBestVarfor = (
     }
   });
 
-  return [
-    sortedVarfor[0].pesertaId,
-    sortedVarfor[0].namaTim,
-    sortedVarfor[0].nilai.varfor,
-  ];
+  // // Get the top 10 entries
+  const top10 = sortedVarfor.slice(0, 10);
+
+  // // Map the top 10 entries to the required format
+  return top10.map((entry) => [
+    entry.pesertaId,
+    entry.namaTim,
+    entry.nilai.varfor,
+  ]);
 };
 
 export const getBestPBB = (
   sortedPeserta: Peringkat[]
-): [string, string, number] => {
+): [string, string, number][] => {
   const sortedpbb = [...sortedPeserta].sort((a, b) => {
     if (a.nilai.pbb !== b.nilai.pbb) {
       return b.nilai.pbb - a.nilai.pbb;
@@ -148,13 +150,20 @@ export const getBestPBB = (
       return a.juara - b.juara;
     }
   });
+  // // Get the top 10 entries
+  const top10 = sortedpbb.slice(0, 3);
 
-  return [sortedpbb[0].pesertaId, sortedpbb[0].namaTim, sortedpbb[0].nilai.pbb];
+  // // Map the top 10 entries to the required format
+  return top10.map((entry) => [
+    entry.pesertaId,
+    entry.namaTim,
+    entry.nilai.pbb,
+  ]);
 };
 
 export const getBestDanton = (
   sortedPeserta: Peringkat[]
-): [string, string, number] => {
+): [string, string, number][] => {
   const sortedDanton = [...sortedPeserta].sort((a, b) => {
     if (a.nilai.danton !== b.nilai.danton) {
       return b.nilai.danton - a.nilai.danton;
@@ -162,10 +171,13 @@ export const getBestDanton = (
       return a.juara - b.juara;
     }
   });
+  // // Get the top 10 entries
+  const top10 = sortedDanton.slice(0, 3);
 
-  return [
-    sortedDanton[0].pesertaId,
-    sortedDanton[0].namaTim,
-    sortedDanton[0].nilai.danton,
-  ];
+  // // Map the top 10 entries to the required format
+  return top10.map((entry) => [
+    entry.pesertaId,
+    entry.namaTim,
+    entry.nilai.danton,
+  ]);
 };
