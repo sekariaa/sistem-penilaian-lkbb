@@ -123,7 +123,7 @@ const TableNilai: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
               <tfoot>
                 <tr>
                   <td colSpan={2} className="text-center text-red-500">
-                    Diupdate Pada: {formatDate(updatedAt)}
+                    Diperbarui {formatDate(updatedAt)}
                   </td>
                 </tr>
               </tfoot>

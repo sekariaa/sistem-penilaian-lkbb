@@ -270,7 +270,7 @@ export default function AccessibleTable({ eventName }: Event) {
             {updatedAt && (
               <TableRow>
                 <TableCell colSpan={12} className="text-center text-red-500">
-                  Diperbarui Pada: {formatDate(updatedAt)}
+                  Diperbarui {formatDate(updatedAt)}
                 </TableCell>
               </TableRow>
             )}

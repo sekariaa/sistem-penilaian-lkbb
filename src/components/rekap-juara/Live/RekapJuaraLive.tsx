@@ -44,7 +44,7 @@ const RekapJuaraLive = () => {
       ) : !event ? (
         <p className="text-center">Event tidak ditemukan.</p>
       ) : (
-        <div>
+        <div className="flex-col items-center justify-center">
           <h1 className="text-center text-3xl font-bold mb-3">Rekap Juara</h1>
           <div className="flex flex-col md:flex-row justify-between">
             <div className="space-y-2 mb-3">
