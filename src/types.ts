@@ -9,3 +9,18 @@ export interface SidebarItems {
   }>;
   extras?: ReactNode;
 }
+
+//tipe untuk signin
+export interface Signin {
+  email: string;
+  password: string;
+}
+
+//tipe untuk event
+export interface EventType {
+  eventID: string;
+  name: string;
+  createdAt: Date;
+  organizer: string;
+  level: string;
+}

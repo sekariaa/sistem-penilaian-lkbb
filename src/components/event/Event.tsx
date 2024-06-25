@@ -5,17 +5,10 @@ import { getEvents } from "../../utils/event";
 import AddIcon from "@mui/icons-material/Add";
 import CircularProgress from "@mui/material/CircularProgress";
 import { Button, TextField } from "@mui/material";
+import { EventType } from "../../types";
 
 const Event = () => {
-  const [events, setEvents] = useState<
-    {
-      eventID: string;
-      name: string;
-      createdAt: Date;
-      organizer: string;
-      level: string;
-    }[]
-  >([]);
+  const [events, setEvents] = useState<EventType[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 

@@ -14,7 +14,6 @@ export const SignIn = async (email: string, password: string) => {
 
 //mendapatkan error signin
 export const GetSignInErrorMessage = (code: any) => {
-  console.log(code);
   switch (code) {
     case "auth/user-not-found":
       return "Email tidak terdaftar";

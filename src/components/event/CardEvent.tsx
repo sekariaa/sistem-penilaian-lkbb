@@ -7,16 +7,9 @@ import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import { Tooltip } from "@mui/material";
 import Link from "next/link";
+import { EventType } from "../../types";
 
-interface Event {
-  eventID: string;
-  name: string;
-  createdAt: Date;
-  organizer: string;
-  level: string;
-}
-
-const CardEvent = ({ event }: { event: Event }) => (
+const CardEvent = ({ event }: { event: EventType }) => (
   <Box sx={{ maxWidth: 200 }}>
     <Card variant="outlined">
       <CardContent className="cursor-default">

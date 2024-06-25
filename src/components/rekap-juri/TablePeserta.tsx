@@ -17,7 +17,7 @@ import {
   addAllJuara,
 } from "@/utils/participant";
 import LinearProgress from "@mui/material/LinearProgress";
-import ButtonComponent from "./ButtonComponent";
+import ButtonComponent from "../button/ButtonCRUDComponent";
 import Link from "next/link";
 import TextField from "@mui/material/TextField";
 
