@@ -24,6 +24,7 @@ export interface EventType {
   organizer: string;
   level: string;
   updatedAt: Timestamp;
+  createdAt: Date;
 }
 
 export interface ParticipantType {

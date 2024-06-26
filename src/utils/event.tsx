@@ -109,6 +109,7 @@ export const getEvent = async (eventID: string): Promise<EventType> => {
           organizer: eventData.organizer,
           level: eventData.level,
           updatedAt: eventData.updatedAt,
+          createdAt: eventData.createdAt,
         };
       } else {
         throw new Error("Event tidak ditemukan.");
