@@ -10,6 +10,7 @@ import {
   getDoc,
   orderBy,
   setDoc,
+  Timestamp,
 } from "firebase/firestore";
 import { getCurrentUser } from "./user";
 import { EventType } from "../types";
@@ -63,6 +64,7 @@ export const getEvents = async () => {
       createdAt: Date;
       organizer: string;
       level: string;
+      updatedAt: Timestamp;
     }[] = [];
 
     if (currentUser) {
@@ -81,6 +83,7 @@ export const getEvents = async () => {
           createdAt: createdAt.toDate(),
           organizer,
           level,
+          updatedAt: createdAt.toDate(),
         });
       });
     } else {
