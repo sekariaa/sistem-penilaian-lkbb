@@ -37,16 +37,16 @@ const UploadNilai = () => {
   }, [pesertaID, eventID]);
 
   return (
-    <section className="mx-auto max-w-[1640px]">
+    <section className="mx-auto max-w-[1640px] text-black-primary">
       <Link href="./" passHref>
-        <IconButton style={{ color: "#000000" }}>
+        <IconButton style={{ color: "#151c24" }}>
           <ArrowBackIosIcon />
         </IconButton>
       </Link>
 
       {loading ? (
         <div className="flex justify-center py-5">
-          <CircularProgress style={{ color: "#000000" }} />
+          <CircularProgress style={{ color: "#151c24" }} />
         </div>
       ) : !eventID || !pesertaID || !participant ? (
         <p className="text-center">Data tidak ditemukan.</p>

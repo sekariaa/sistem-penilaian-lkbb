@@ -10,7 +10,7 @@ import Link from "next/link";
 import { EventType } from "../../types";
 
 const CardEvent = ({ event }: { event: EventType }) => (
-  <Box sx={{ maxWidth: 200 }}>
+  <Box sx={{ minWidth: 250 }}>
     <Card variant="outlined">
       <CardContent className="cursor-default">
         <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>

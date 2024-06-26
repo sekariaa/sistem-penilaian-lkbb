@@ -36,10 +36,10 @@ const RekapJuaraLive = () => {
   }, [eventID]);
 
   return (
-    <section className="mx-auto max-w-[1640px] p-3">
+    <section className="mx-auto max-w-[1640px] p-3 text-black-primary">
       {loading ? (
         <div className="flex justify-center py-5">
-          <CircularProgress style={{ color: "#000000" }} />
+          <CircularProgress style={{ color: "#151c24" }} />
         </div>
       ) : !event ? (
         <p className="text-center">Event tidak ditemukan.</p>

@@ -12,6 +12,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { getCurrentUser } from "./user";
+import { EventType } from "../types";
 
 export const db = getFirestore();
 
@@ -45,8 +46,6 @@ export const addevent = async (
       organizer: organizer,
       level: level,
     });
-
-    console.log("Event berhasil ditambahkan dengan ID:", eventId);
     return eventId;
   } catch (error: any) {
     console.error("Gagal menambahkan event:", error.message);
@@ -95,7 +94,7 @@ export const getEvents = async () => {
 };
 
 //get single event by uid dan id
-export const getEvent = async (eventID: string) => {
+export const getEvent = async (eventID: string): Promise<EventType> => {
   try {
     const currentUser = getCurrentUser();
     if (currentUser) {

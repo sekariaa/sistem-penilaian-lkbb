@@ -7,14 +7,11 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import CircularProgress from "@mui/material/CircularProgress";
 import TableNilai from "./TableNilai";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
-import { Button } from "@mui/material";
+import { ParticipantType } from "@/types";
+import ButtonComponent from "../button/ButtonComponent";
 
 const DataNilai = () => {
-  const [participant, setParticipant] = useState<{
-    pesertaID: string;
-    noUrut: number;
-    namaTim: string;
-  } | null>(null);
+  const [participant, setParticipant] = useState<ParticipantType | null>(null);
   const [loading, setLoading] = useState(true);
   const params = useParams();
   const eventID = Array.isArray(params.eventID)
@@ -40,16 +37,16 @@ const DataNilai = () => {
   }, [pesertaID, eventID]);
 
   return (
-    <section className="mx-auto max-w-[1640px]">
+    <section className="mx-auto max-w-[1640px] text-black-primary">
       <Link href="../" passHref>
-        <IconButton style={{ color: "#000000" }}>
+        <IconButton style={{ color: "#151c24" }}>
           <ArrowBackIosIcon />
         </IconButton>
       </Link>
 
       {loading ? (
         <div className="flex justify-center py-5">
-          <CircularProgress style={{ color: "#000000" }} />
+          <CircularProgress style={{ color: "#151c24" }} />
         </div>
       ) : !eventID || !pesertaID || !participant ? (
         <p className="text-center">Data tidak ditemukan.</p>
@@ -57,7 +54,7 @@ const DataNilai = () => {
         <div>
           <h1 className="text-center text-3xl font-bold mb-3">Data Nilai</h1>
           <div className="flex flex-col md:flex-row justify-between">
-            <div className="space-y-2 mb-3">
+            <div className="space-y-1 mb-3">
               <p>
                 <span className="font-bold">Nomor urut: </span>{" "}
                 {participant.noUrut}
@@ -72,14 +69,17 @@ const DataNilai = () => {
                 href={`/event/rekap-juri/${eventID}/data-nilai/${pesertaID}/upload-nilai`}
                 passHref
               >
-                <Button
-                  variant="contained"
-                  startIcon={<FileUploadIcon />}
-                  size="small"
-                  style={{ backgroundColor: "#000000", textTransform: "none" }}
+                <ButtonComponent
+                  intent="primary-small"
+                  leftIcon={
+                    <FileUploadIcon
+                      fontSize="small"
+                      style={{ fill: "#ffffff" }}
+                    />
+                  }
                 >
                   Upload Nilai
-                </Button>
+                </ButtonComponent>
               </Link>
             </div>
           </div>

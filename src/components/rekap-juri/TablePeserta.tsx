@@ -20,6 +20,7 @@ import LinearProgress from "@mui/material/LinearProgress";
 import ButtonComponent from "../button/ButtonCRUDComponent";
 import Link from "next/link";
 import TextField from "@mui/material/TextField";
+import { ParticipantType } from "@/types";
 
 interface Data {
   pesertaID: string;
@@ -28,17 +29,12 @@ interface Data {
   lainnya: any;
 }
 
-function createData(
-  pesertaID: string,
-  noUrut: number,
-  namaTim: string,
-  lainnya: any
-): Data {
+function createData(participant: ParticipantType): Data {
   return {
-    pesertaID,
-    noUrut,
-    namaTim,
-    lainnya,
+    pesertaID: participant.pesertaID,
+    noUrut: participant.noUrut,
+    namaTim: participant.namaTim,
+    lainnya: "Lainnya",
   };
 }
 
@@ -173,16 +169,7 @@ export default function EnhancedTable() {
     const fetchData = async () => {
       try {
         const data = await getParticipants(eventID);
-        setParticipants(
-          data.map((participant) =>
-            createData(
-              participant.pesertaID,
-              participant.noUrut,
-              participant.namaTim,
-              "Lainnya"
-            )
-          )
-        );
+        setParticipants(data.map((participant) => createData(participant)));
         setLoading(false);
       } catch (error) {
         setLoading(false);
@@ -252,10 +239,6 @@ export default function EnhancedTable() {
 
   const requestSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearched(event.target.value);
-  };
-
-  const cancelSearch = () => {
-    setSearched("");
   };
 
   return (

@@ -8,7 +8,7 @@ interface HandleFileProps {
 }
 
 const formatDate = (date: Date | null): string => {
-  if (!date) return "-"; // Handle null or undefined case
+  if (!date) return "-";
 
   const months = [
     "Januari",
@@ -86,7 +86,7 @@ const TableNilai: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
   ];
 
   return (
-    <section>
+    <section className="text-black-primary">
       {loading && <LinearProgress color="inherit" />}
       {!loading && (!nilaiData || Object.keys(nilaiData).length === 0) ? (
         <div className="text-center">
@@ -94,7 +94,7 @@ const TableNilai: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
         </div>
       ) : (
         <div>
-          <table className="w-full border-collapse border border-gray-400 mb-3">
+          <table className="w-full border-collapse border border-gray-300 mb-3">
             <thead>
               <tr>
                 <th className="border border-gray-300 px-4 py-1 bg-gray-100">

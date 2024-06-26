@@ -13,6 +13,7 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { getCurrentUser } from "./user";
+import { ParticipantType } from "../types";
 
 export const db = getFirestore();
 
@@ -142,11 +143,7 @@ export const editParticipant = async (
 //get all participants by uid+eventid
 export const getParticipants = async (eventId: string) => {
   try {
-    const participantList: {
-      pesertaID: string;
-      noUrut: number;
-      namaTim: string;
-    }[] = [];
+    const participantList: ParticipantType[] = [];
 
     //cek user
     const currentUser = getCurrentUser();
@@ -190,7 +187,10 @@ export const getParticipants = async (eventId: string) => {
 };
 
 //get single participant by uid dan eventid
-export const getParticipant = async (eventId: string, pesertaId: string) => {
+export const getParticipant = async (
+  eventId: string,
+  pesertaId: string
+): Promise<ParticipantType> => {
   try {
     //cek user
     const currentUser = getCurrentUser();

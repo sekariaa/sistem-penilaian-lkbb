@@ -3,6 +3,7 @@ import * as XLSX from "xlsx";
 import { addAllJuara, saveNilai } from "@/utils/participant";
 import AlertComponent from "../AlertComponent";
 import CircularProgress from "@mui/material/CircularProgress";
+import ButtonComponent from "../button/ButtonComponent";
 
 interface HandleFileProps {
   eventID: string;
@@ -59,40 +60,6 @@ const HandleFile: React.FC<HandleFileProps> = ({
       setTypeError("Silakan pilih berkas yang sesuai dengan template.");
     }
   };
-
-  // submit event
-  // const handleFileSubmit = (e: React.FormEvent) => {
-  //   setLoadingUpload(true);
-  //   e.preventDefault();
-  //   if (excelFile !== null) {
-  //     const workbook = XLSX.read(excelFile, { type: "buffer" });
-  //     const worksheetName = workbook.SheetNames[0];
-  //     const worksheet = workbook.Sheets[worksheetName];
-
-  //     // Extracting data from specific rows and columns
-  //     const data = [];
-  //     for (let i = 3; i <= 8; i++) {
-  //       // Rows 3 to 8
-  //       const cellValueA = worksheet[`A${i}`]?.v || "";
-  //       const cellValueB = worksheet[`B${i}`]?.v || "";
-  //       const cellValueC = worksheet[`C${i}`]?.v || "";
-  //       const cellValueD = worksheet[`D${i}`]?.v || 0;
-  //       data.push({
-  //         Deskripsi: `${cellValueA} ${cellValueB} ${cellValueC}`,
-  //         Nilai: cellValueD,
-  //       });
-  //     }
-
-  //     // Extract No Urut from cell B2
-  //     const noUrutValue = worksheet[`B2`]?.v || null;
-  //     setNoUrutExcel(noUrutValue ? noUrutValue : null);
-
-  //     setExcelData(data);
-  //     setLoadingUpload(false);
-  //     setError(null);
-  //   }
-  //   setLoadingUpload(false);
-  // };
 
   const handleFileSubmit = (e: React.FormEvent) => {
     setLoadingUpload(true);
@@ -227,20 +194,9 @@ const HandleFile: React.FC<HandleFileProps> = ({
           required
           onChange={handleFile}
         />
-        <button
-          type="submit"
-          className="relative w-20 inline-flex items-center justify-center mb-1 overflow-hidden text-sm font-medium text-white rounded group bg-black"
-        >
-          {loadingUpload ? (
-            <span className="relative px-3 py-2 transition-all ease-in duration-75 group-hover:bg-opacity-0 ">
-              <CircularProgress size="1rem" style={{ color: "#ffffff" }} />
-            </span>
-          ) : (
-            <span className="relative px-3 py-2 transition-all ease-in duration-75 group-hover:bg-opacity-0 ">
-              Upload
-            </span>
-          )}
-        </button>
+        <ButtonComponent intent="primary-small" loading={loadingUpload}>
+          Upload
+        </ButtonComponent>
         {typeError && (
           <div className="text-red-500" role="alert">
             {typeError}
@@ -283,23 +239,24 @@ const HandleFile: React.FC<HandleFileProps> = ({
                 ))}
               </tbody>
             </table>
-            <div className="flex justify-center items-center">
+            <div
+              className="flex justify-center items-center "
+              onClick={handleSave}
+            >
               <button
                 type="submit"
-                className="relative w-20 inline-flex items-center justify-center overflow-hidden text-sm font-medium text-white rounded group bg-black"
+                className="relative w-20 inline-flex items-center justify-center overflow-hidden text-sm font-medium text-white rounded group bg-black-primary hover:bg-black-secondary"
                 onClick={handleSave}
               >
                 {loadingSave ? (
-                  <span className="relative px-3 py-2 transition-all ease-in duration-75 group-hover:bg-opacity-0 ">
+                  <span className="px-3 py-2">
                     <CircularProgress
                       size="1rem"
                       style={{ color: "#ffffff" }}
                     />
                   </span>
                 ) : (
-                  <span className="relative px-3 py-2 transition-all ease-in duration-75 group-hover:bg-opacity-0 ">
-                    Simpan
-                  </span>
+                  <span className="px-3 py-2">Simpan</span>
                 )}
               </button>
             </div>

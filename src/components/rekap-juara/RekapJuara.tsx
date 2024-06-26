@@ -6,6 +6,9 @@ import Link from "next/link";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { IconButton } from "@mui/material";
 import TableJuara from "./TableJuara";
+import ButtonComponent from "../button/ButtonComponent";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import AlertComponent from "../AlertComponent";
 
 const RekapNilai = () => {
   const [event, setEvent] = useState<{
@@ -19,6 +22,22 @@ const RekapNilai = () => {
   const eventID = Array.isArray(params.eventID)
     ? params.eventID[0]
     : params.eventID;
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const copyToClipboard = () => {
+    const link = `https://rekap-pembaris.vercel.app/live/${eventID}`;
+    navigator.clipboard
+      .writeText(link)
+      .then(() => {
+        setSuccess("Berhasil copy link live score!");
+        setTimeout(() => setSuccess(null), 3000);
+      })
+      .catch((error) => {
+        setError("Gagal copy link live score!");
+        setTimeout(() => setError(null), 3000);
+      });
+  };
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -39,22 +58,22 @@ const RekapNilai = () => {
   }, [eventID]);
 
   return (
-    <section className="mx-auto max-w-[1640px]">
+    <section className="mx-auto max-w-[1640px] text-black-primary">
       <Link href="./" passHref>
-        <IconButton style={{ color: "#000000" }}>
+        <IconButton style={{ color: "#151c24" }}>
           <ArrowBackIosIcon />
         </IconButton>
       </Link>
       {loading ? (
         <div className="flex justify-center py-5">
-          <CircularProgress style={{ color: "#000000" }} />
+          <CircularProgress style={{ color: "#151c24" }} />
         </div>
       ) : !event ? (
         <p className="text-center">Event tidak ditemukan.</p>
       ) : (
         <div>
           <h1 className="text-center text-3xl font-bold mb-3">Rekap Juara</h1>
-          <div className="flex flex-col md:flex-row justify-between">
+          <div className="flex flex-col md:flex-row justify-between mb-3">
             <div className="space-y-2 mb-3">
               <p>
                 <span className="font-bold">Nama Event: </span> {event.name}
@@ -68,12 +87,28 @@ const RekapNilai = () => {
                 {event.level}
               </p>
             </div>
-            <div className="mb-3"></div>
+            <div className="flex gap-3">
+              <div onClick={copyToClipboard}>
+                <ButtonComponent
+                  intent="primary-small"
+                  leftIcon={
+                    <ContentCopyIcon
+                      fontSize="small"
+                      style={{ fill: "#ffffff" }}
+                    />
+                  }
+                >
+                  Live Score
+                </ButtonComponent>
+              </div>
+            </div>
           </div>
 
           <TableJuara eventName={event.name} />
         </div>
       )}
+      <AlertComponent severity="success" message={success} />
+      <AlertComponent severity="error" message={error} />
     </section>
   );
 };

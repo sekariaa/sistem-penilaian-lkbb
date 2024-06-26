@@ -9,6 +9,7 @@ import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined
 import AlertComponent from "../../components/AlertComponent";
 import { Signin } from "../../types";
 import ButtonComponent from "@/components/button/ButtonComponent";
+import Link from "next/link";
 
 const LoginPage = () => {
   const {
@@ -40,10 +41,7 @@ const LoginPage = () => {
   };
 
   return (
-    <main
-      className="min-h-screen px-6 py-6 flex items-center md:justify-center bg-cover bg-center"
-      style={{ backgroundImage: 'url("bg-signin.png")' }}
-    >
+    <main className="min-h-screen px-6 py-6 flex items-center md:justify-center bg-cover bg-center bg-[url('/bg-signin.png')]">
       <section className="rounded-3xl mx-auto p-3 shadow-2xl max-w-md w-full bg-white bg-opacity-80">
         <h1 className="px-3 text-black-primary font-bold mb-1 text-lg text-center">
           Masuk Akun
@@ -122,13 +120,13 @@ const LoginPage = () => {
         <section>
           <p className="px-3 text-xs text-center text-gray-primary">
             Belum memiliki akun? Hubungi nomor
-            <a
+            <Link
               href="https://wa.me/85335224311"
               target="_blank"
               className="underline ml-1"
             >
               berikut
-            </a>
+            </Link>
             .
           </p>
         </section>

@@ -10,6 +10,7 @@ const config: Config = {
     extend: {
       colors: {
         "black-primary": "#151c24",
+        "black-secondary": "#344051",
         "gray-primary": "#97A1AF",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -63,6 +64,9 @@ const config: Config = {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      backgroundSize: {
+        "65%": "65%",
       },
     },
   },

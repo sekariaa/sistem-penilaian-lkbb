@@ -4,8 +4,8 @@ import { addevent } from "@/utils/event";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { IconButton } from "@mui/material";
 import Link from "next/link";
-import CircularProgress from "@mui/material/CircularProgress";
 import AlertComponent from "../AlertComponent";
+import ButtonComponent from "../button/ButtonComponent";
 
 const FormAddEvent = () => {
   const [eventName, setEventName] = useState("");
@@ -42,9 +42,9 @@ const FormAddEvent = () => {
 
   return (
     <section className="mx-auto max-w-[1640px]">
-      <div className="flex items-center mb-3">
+      <div className="flex items-center mb-3 text-black-primary">
         <Link href="event" passHref>
-          <IconButton style={{ color: "#000000" }}>
+          <IconButton style={{ color: "#151c24" }}>
             <ArrowBackIosIcon />
           </IconButton>
         </Link>
@@ -56,7 +56,7 @@ const FormAddEvent = () => {
             type="string"
             name="floating_name"
             id="floating_name"
-            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none  focus:outline-none focus:ring-0 focus:border-black peer"
+            className="block py-2.5 px-0 w-full text-sm text-black-primary bg-transparent border-0 border-b-2 border-gray-primary appearance-none  focus:outline-none focus:ring-0 focus:border-black peer"
             placeholder=" "
             value={eventName}
             onChange={(e) => setEventName(e.target.value)}
@@ -74,7 +74,7 @@ const FormAddEvent = () => {
             type="string"
             name="floating_organizer"
             id="floating_organizer"
-            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none  focus:outline-none focus:ring-0 focus:border-black peer"
+            className="block py-2.5 px-0 w-full text-sm text-black-primary bg-transparent border-0 border-b-2 border-gray-primary appearance-none  focus:outline-none focus:ring-0 focus:border-black peer"
             placeholder=" "
             value={organizer}
             onChange={(e) => setOrganizer(e.target.value)}
@@ -87,8 +87,10 @@ const FormAddEvent = () => {
             Penyelenggara Event
           </label>
         </div>
-        <p className="mb-1">Pilih Tingkat Perlombaan:</p>
-        <div className="flex items-center space-x-3 mb-5 ">
+        <p className="mb-1 text-black-primary text-sm">
+          Pilih Tingkat Perlombaan:
+        </p>
+        <div className="flex items-center space-x-3 mb-5 text-sm text-black-primary">
           <div className="space-x-2">
             <input
               type="radio"
@@ -110,20 +112,9 @@ const FormAddEvent = () => {
             <label>SMP/sederajat</label>
           </div>
         </div>
-        <button
-          type="submit"
-          className="text-white bg-black font-medium rounded-full text-sm w-full px-5 py-2.5 text-center "
-        >
-          {isLoading ? (
-            <span className="w-full relative px-5 py-2 transition-all ease-in duration-75 rounded-md group-hover:bg-opacity-0 ">
-              <CircularProgress size="1rem" style={{ color: "#ffffff" }} />
-            </span>
-          ) : (
-            <span className="w-full relative px-5 py-2 transition-all ease-in duration-75 rounded-md group-hover:bg-opacity-0 ">
-              Simpan
-            </span>
-          )}
-        </button>
+        <ButtonComponent intent="primary-full" loading={isLoading}>
+          Simpan
+        </ButtonComponent>
       </form>
       <AlertComponent severity="success" message={success} />
       <AlertComponent severity="error" message={error} />

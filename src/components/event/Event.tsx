@@ -4,8 +4,9 @@ import CardEvent from "./CardEvent";
 import { getEvents } from "../../utils/event";
 import AddIcon from "@mui/icons-material/Add";
 import CircularProgress from "@mui/material/CircularProgress";
-import { Button, TextField } from "@mui/material";
+import { TextField } from "@mui/material";
 import { EventType } from "../../types";
+import ButtonComponent from "../button/ButtonComponent";
 
 const Event = () => {
   const [events, setEvents] = useState<EventType[]>([]);
@@ -37,7 +38,9 @@ const Event = () => {
 
   return (
     <section className="mx-auto max-w-[1640px]">
-      <h1 className="text-center text-3xl font-bold mb-3">Daftar Event</h1>
+      <h1 className="text-center text-3xl font-bold mb-3 text-black-primary">
+        Daftar Event
+      </h1>
       <div className="mb-3 flex flex-col md:flex-row space-y-2 justify-between items-center">
         <TextField
           label="Cari Event"
@@ -46,40 +49,39 @@ const Event = () => {
           value={searchQuery}
           onChange={handleSearchChange}
           sx={{
+            width: 250,
             "& .MuiInputBase-input": {
-              color: "#000000",
+              color: "#151c24",
             },
             "& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline": {
-              borderColor: "#000000",
+              borderColor: "#151c24",
             },
             "& .MuiInputLabel-root": {
-              color: "#000000",
+              color: "#97A1AF",
             },
             "& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline":
               {
-                borderColor: "#000000",
+                borderColor: "#151c24",
               },
             "& .MuiInputLabel-root.Mui-focused": {
-              color: "#000000",
+              color: "#151c24",
             },
           }}
         />
         <Link href="tambah-event" passHref>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            size="small"
-            style={{ backgroundColor: "#000000", textTransform: "none" }}
+          <ButtonComponent
+            intent="primary-small"
+            leftIcon={<AddIcon fontSize="small" style={{ fill: "#ffffff" }} />}
           >
             Tambah Event
-          </Button>
+          </ButtonComponent>
         </Link>
       </div>
-      <div className="flex justify-center">
+      <div className="flex justify-center mb-5">
         {loading ? (
-          <CircularProgress style={{ color: "#000000" }} />
+          <CircularProgress style={{ color: "#151c24" }} />
         ) : filteredEvents.length > 0 ? (
-          <div className="gap-x-5 gap-y-8 grid grid-cols-1 xl:w-full md:w-full xl:grid-cols-6 md:grid-cols-4 sm:grid-cols-2">
+          <div className="xl:w-full md:w-full grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {filteredEvents.map((event) => (
               <CardEvent key={event.eventID} event={event} />
             ))}

@@ -36,7 +36,7 @@ interface Event {
 }
 
 const formatDate = (date: Date | null): string => {
-  if (!date) return "-"; // Handle null or undefined case
+  if (!date) return "-";
 
   const months = [
     "Januari",
@@ -87,7 +87,6 @@ export default function AccessibleTable({ eventName }: Event) {
   const eventID = Array.isArray(params.eventID)
     ? params.eventID[0]
     : params.eventID;
-  const [loadingExport, setLoadingExport] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [updatedAt, setUpdatedAt] = React.useState<Date | null>(null);
 

@@ -6,17 +6,13 @@ import Link from "next/link";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { IconButton } from "@mui/material";
 import TablePeserta from "./TablePeserta";
-import { Button } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import { EventType } from "../../types";
+import ButtonComponent from "../button/ButtonComponent";
 
 const RekapNilai = () => {
-  const [event, setEvent] = useState<{
-    eventID: string;
-    name: string;
-    organizer: string;
-    level: string;
-  } | null>(null);
+  const [event, setEvent] = useState<EventType | null>(null);
   const [loading, setLoading] = useState(true);
   const params = useParams();
   const eventID = Array.isArray(params.eventID)
@@ -46,24 +42,24 @@ const RekapNilai = () => {
   return (
     <section className="mx-auto max-w-[1640px]">
       <Link href="../" passHref>
-        <IconButton style={{ color: "#000000" }}>
+        <IconButton style={{ color: "#151c24" }}>
           <ArrowBackIosIcon />
         </IconButton>
       </Link>
 
       {loading ? (
         <div className="flex justify-center py-5">
-          <CircularProgress style={{ color: "#000000" }} />
+          <CircularProgress style={{ color: "#151c24" }} />
         </div>
       ) : !event ? (
-        <p className="text-center">Event tidak ditemukan.</p>
+        <p className="text-center text-black-primary">Event tidak ditemukan.</p>
       ) : (
-        <div>
+        <div className="text-black-primary">
           <h1 className="text-center text-3xl font-bold mb-3">
             Daftar Peserta
           </h1>
-          <div className="flex flex-col md:flex-row justify-between">
-            <div className="space-y-2 mb-3">
+          <div className="flex flex-col md:flex-row justify-between mb-3">
+            <div className="space-y-1 ">
               <p>
                 <span className="font-bold">Nama Event: </span> {event.name}
               </p>
@@ -76,29 +72,32 @@ const RekapNilai = () => {
                 {event.level}
               </p>
             </div>
-            <div className="flex gap-3 mb-3">
+            <div className="flex gap-3">
               <Link
                 href={`/event/rekap-juri/${eventID}/tambah-peserta`}
                 passHref
               >
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  size="small"
-                  style={{ backgroundColor: "#000000", textTransform: "none" }}
+                <ButtonComponent
+                  intent="primary-small"
+                  leftIcon={
+                    <AddIcon fontSize="small" style={{ fill: "#ffffff" }} />
+                  }
                 >
                   Tambah Peserta
-                </Button>
+                </ButtonComponent>
               </Link>
               <Link href={`/event/rekap-juri/${eventID}/rekap-juara`} passHref>
-                <Button
-                  variant="contained"
-                  startIcon={<EmojiEventsIcon />}
-                  size="small"
-                  style={{ backgroundColor: "#000000", textTransform: "none" }}
+                <ButtonComponent
+                  intent="primary-small"
+                  leftIcon={
+                    <EmojiEventsIcon
+                      fontSize="small"
+                      style={{ fill: "#ffffff" }}
+                    />
+                  }
                 >
                   Hasil Penilaian
-                </Button>
+                </ButtonComponent>
               </Link>
             </div>
           </div>

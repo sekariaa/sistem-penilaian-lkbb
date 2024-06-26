@@ -29,10 +29,13 @@ export function SidebarMobile(props: SidebarMobileProps) {
   const handleSignOut = async () => {
     try {
       await Authentication().signOut();
-      localStorage.removeItem("username");
     } catch (error) {
       console.error("Error signing out:", error);
     }
+  };
+
+  const isActive = (linkHref: string) => {
+    return pathname === linkHref || pathname.startsWith(`${linkHref}/`);
   };
 
   return (
@@ -44,7 +47,7 @@ export function SidebarMobile(props: SidebarMobileProps) {
       </SheetTrigger>
       <SheetContent side="left" className="px-3 py-4" hideClose>
         <SheetHeader className="flex flex-row justify-between items-center space-y-0">
-          <span className="text-lg font-semibold text-foreground mx-3">
+          <span className="text-lg font-semibold text-foreground mx-3 text-center text-black-primary">
             Rekap Pembaris
           </span>
           <SheetClose asChild>
@@ -58,7 +61,7 @@ export function SidebarMobile(props: SidebarMobileProps) {
             {props.sidebarItems.links.map((link, idx) => (
               <Link key={idx} href={link.href}>
                 <SidebarButton
-                  variant={pathname === link.href ? "secondary" : "ghost"}
+                  variant={isActive(link.href) ? "secondary" : "ghost"}
                   icon={link.icon}
                   className="w-full"
                 >
@@ -66,7 +69,6 @@ export function SidebarMobile(props: SidebarMobileProps) {
                 </SidebarButton>
               </Link>
             ))}
-            {props.sidebarItems.extras}
           </div>
           <div className="absolute w-full bottom-4 px-1 left-0">
             <Separator className="absolute -top-3 left-0 w-full" />
@@ -75,7 +77,7 @@ export function SidebarMobile(props: SidebarMobileProps) {
                 <Button variant="ghost" className="w-full justify-start">
                   <div className="flex justify-between items-center w-full">
                     <div className="flex gap-2">
-                      <span>{user?.email}</span>
+                      <span className="text-black-primary">{user?.email}</span>
                     </div>
                     <MoreHorizontal size={20} />
                   </div>

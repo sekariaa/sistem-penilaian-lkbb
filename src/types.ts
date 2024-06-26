@@ -1,3 +1,4 @@
+import { Timestamp } from "firebase/firestore";
 import { LucideIcon } from "lucide-react";
 import { ReactNode } from "react";
 
@@ -20,7 +21,13 @@ export interface Signin {
 export interface EventType {
   eventID: string;
   name: string;
-  createdAt: Date;
   organizer: string;
   level: string;
+  updatedAt: Timestamp;
+}
+
+export interface ParticipantType {
+  pesertaID: string;
+  noUrut: number;
+  namaTim: string;
 }

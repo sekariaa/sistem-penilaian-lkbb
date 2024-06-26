@@ -18,7 +18,7 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <CircularProgress style={{ color: "#000000" }} />
+        <CircularProgress style={{ color: "#151c24" }} />
       </div>
     );
   }

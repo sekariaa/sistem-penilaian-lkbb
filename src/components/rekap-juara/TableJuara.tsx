@@ -90,6 +90,7 @@ export default function AccessibleTable({ eventName }: Event) {
   const [loadingExport, setLoadingExport] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [updatedAt, setUpdatedAt] = React.useState<Date | null>(null);
+  const [hoveredRow, setHoveredRow] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -355,7 +356,7 @@ export default function AccessibleTable({ eventName }: Event) {
           <TableBody>
             {nilaiPeserta.length === 0 && !loading ? (
               <TableRow>
-                <TableCell colSpan={9} align="center">
+                <TableCell colSpan={12} align="center">
                   <p className="text-gray-400">Tidak Ada Data</p>
                 </TableCell>
               </TableRow>
@@ -363,7 +364,21 @@ export default function AccessibleTable({ eventName }: Event) {
               nilaiPeserta
                 .sort((a, b) => a.juara - b.juara)
                 .map((row) => (
-                  <TableRow key={row.noUrut}>
+                  <TableRow
+                    key={row.noUrut}
+                    sx={{
+                      "&:hover": {
+                        backgroundColor: "#F0F0F0",
+                        cursor: "default",
+                      },
+                    }}
+                    onMouseEnter={() => setHoveredRow(row.pesertaId)}
+                    onMouseLeave={() => setHoveredRow(null)}
+                    style={{
+                      backgroundColor:
+                        hoveredRow === row.pesertaId ? "#F0F0F0" : "inherit",
+                    }}
+                  >
                     <TableCell component="th" scope="row" align="center">
                       {row.noUrut}
                     </TableCell>
@@ -447,7 +462,7 @@ export default function AccessibleTable({ eventName }: Event) {
       <div className="flex justify-center items-center mt-3">
         <button
           type="submit"
-          className="relative w-28 mb-3 inline-flex items-center justify-center overflow-hidden text-sm font-medium text-white rounded group bg-black"
+          className="relative w-28 mb-3 inline-flex items-center justify-center overflow-hidden text-sm font-medium text-white rounded group bg-black-primary hover:bg-black-secondary"
           onClick={exportToExcel}
           disabled={!nilaiPeserta || Object.keys(nilaiPeserta).length === 0}
           style={{
@@ -458,13 +473,11 @@ export default function AccessibleTable({ eventName }: Event) {
           }}
         >
           {loadingExport ? (
-            <span className="relative px-3 py-2 transition-all ease-in duration-75 group-hover:bg-opacity-0 ">
+            <span className="px-3 py-2">
               <CircularProgress size="1rem" style={{ color: "#ffffff" }} />
             </span>
           ) : (
-            <span className="relative px-3 py-2 transition-all ease-in duration-75 group-hover:bg-opacity-0 ">
-              Unduh Data
-            </span>
+            <span className="px-3 py-2">Unduh Data</span>
           )}
         </button>
       </div>
