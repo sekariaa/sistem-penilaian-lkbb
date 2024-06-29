@@ -14,7 +14,7 @@ const CardEvent = ({ event }: { event: EventType }) => (
     <Card variant="outlined">
       <CardContent className="cursor-default">
         <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
-          {event.createdAt.getFullYear()}
+          {event.createdAt.toDate().getFullYear()}
         </Typography>
         <Tooltip title={event.name}>
           <Typography

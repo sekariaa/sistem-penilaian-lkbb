@@ -187,7 +187,7 @@ export default function AccessibleTable({ eventName }: Event) {
           <TableBody>
             {nilaiPeserta.length === 0 && !loading ? (
               <TableRow>
-                <TableCell colSpan={9} align="center">
+                <TableCell colSpan={12} align="center">
                   <p className="text-gray-400">Tidak Ada Data</p>
                 </TableCell>
               </TableRow>
