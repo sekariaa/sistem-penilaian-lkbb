@@ -1,0 +1,149 @@
+[33mcommit f2ff8bb96e63fb0ac64da7e372878558f5bea1f3[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Sat Jun 29 20:43:43 2024 +0700
+
+    first commit
+
+[33mcommit 44cd5cf4c9ea8b91294de849abde2d4927b2ad20[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Wed Jun 26 13:29:54 2024 +0700
+
+    resolve bug event updatedat
+
+[33mcommit 8fc58bfa27fb56cf05cbc775b236b6353ad7570f[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Wed Jun 26 13:24:15 2024 +0700
+
+    resolve bug event
+
+[33mcommit ae33ef4c2b5895785165f469a14ac5a2a89a1267[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Wed Jun 26 13:10:00 2024 +0700
+
+    add styling
+
+[33mcommit e8ae38eb57b71f36afea2cad8653e517abb25721[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Tue Jun 25 14:57:51 2024 +0700
+
+    add: styling login
+
+[33mcommit 6a2ec816197b2a1164a5602edec96ada5c3ef38b[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Mon Jun 24 19:55:29 2024 +0700
+
+    update timestamp
+
+[33mcommit a08593c63f1b97bea7b7683a8bcfebbfd45aa64f[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Mon Jun 24 18:42:17 2024 +0700
+
+    add: table best danton, pbb, and varfor
+
+[33mcommit 439321efa4c571629aa6b6294407bb61c209ac32[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Fri Jun 21 21:35:32 2024 +0700
+
+    add beranda
+
+[33mcommit fb12e4773cde5d81afaceb6cc11a8a119ffe16a5[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Sun Jun 16 20:49:49 2024 +0700
+
+    fixed
+
+[33mcommit 8df84eacd63d0d09042f78456909ccdda1dc39d2[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Sun Jun 16 10:58:31 2024 +0700
+
+    all fiture done
+
+[33mcommit 67c3dab32557a2a724d2a9e5ec717ea25884ab5f[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Sun Jun 16 10:38:44 2024 +0700
+
+    done add best pbb, donton adn search bar peserta
+
+[33mcommit 405d0ec248ed94c723b0ae76c02c94cdbae9a12b[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Sun Jun 16 09:49:22 2024 +0700
+
+    add bestPBB dan bestDanton
+
+[33mcommit 0f3ab921ca8deb49731ade0525954a82ed8e6b67[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Thu Jun 13 20:47:25 2024 +0700
+
+    all done with live report
+
+[33mcommit 78a8983b01f2ccf9a210a3f9d6d486f55d554975[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Thu Jun 13 17:43:23 2024 +0700
+
+    styling protected route
+
+[33mcommit 52e2817fdc1dcba60558f099296b987d154e65a7[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Thu Jun 13 17:37:54 2024 +0700
+
+    styling done
+
+[33mcommit 56f740b8f849f63b0faff3ff0fae2d0b4145dacc[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Thu Jun 13 14:06:33 2024 +0700
+
+    done table peserta
+
+[33mcommit ce16f74ab756b2497d7a2932a8c93883660c74f4[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Thu Jun 13 12:16:42 2024 +0700
+
+    all done event card, add event, search event, sort event
+
+[33mcommit a62cf7935212b91d75caf7e5c9d009fab6589142[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Wed Jun 12 15:20:04 2024 +0700
+
+    progress rekap juara
+
+[33mcommit 23a04fa4e8ec065bbdc7876598d6374496b9f398[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Wed Jun 12 13:37:44 2024 +0700
+
+    progress rekap juara
+
+[33mcommit 938d3c559cd2065c4c8277f79051359cc033c977[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Tue Jun 11 22:08:02 2024 +0700
+
+    progress peringkat
+
+[33mcommit 8e67f48b6e34001639d7266bb744f7df61faef2a[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Tue Jun 11 17:05:10 2024 +0700
+
+    import excel to system
+
+[33mcommit 85918bae1524c6f59ae6e618c44cb71c869f1bb0[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Tue Jun 11 13:09:49 2024 +0700
+
+    done tambah peserta
+
+[33mcommit 39c6dfa477eb64f46af447a99686dd793b26d193[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Tue Jun 11 00:49:28 2024 +0700
+
+    progress get peserta
+
+[33mcommit 0595b706c2662483a10ba2c1137a78134e11651e[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Mon Jun 10 12:41:18 2024 +0700
+
+    progress tambah event
+
+[33mcommit bf2a3de09fb8f47a20d3232f610e7f421a154fda[m
+Author: sekariaa <sekariaa@gmail.com>
+Date:   Sun Jun 9 23:02:31 2024 +0700
+
+    progress tambah event
