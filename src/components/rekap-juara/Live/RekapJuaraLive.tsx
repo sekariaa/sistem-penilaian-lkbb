@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { getEvent } from "@/utils/live";
+import { getEvent } from "@/utils/event";
 import CircularProgress from "@mui/material/CircularProgress";
 import TableJuaraLive from "./TableJuaraLive";
 

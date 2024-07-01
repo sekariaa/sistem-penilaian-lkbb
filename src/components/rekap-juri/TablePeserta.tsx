@@ -14,7 +14,6 @@ import { useParams } from "next/navigation";
 import {
   getParticipants,
   deleteParticipant,
-  addAllJuara,
 } from "@/utils/participant";
 import LinearProgress from "@mui/material/LinearProgress";
 import ButtonComponent from "../button/ButtonCRUDComponent";
@@ -209,7 +208,7 @@ export default function EnhancedTable() {
       try {
         setLoading(true);
         await deleteParticipant(eventID, pesertaID);
-        await addAllJuara(eventID);
+        // await addAllJuara(eventID);
         const updatedParticipants = participants.filter(
           (p) => p.pesertaID !== pesertaID
         );

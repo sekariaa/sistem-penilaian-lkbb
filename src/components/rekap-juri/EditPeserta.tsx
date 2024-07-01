@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { addAllJuara } from "@/utils/participant";
+// import { addAllJuara } from "@/utils/participant";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import { IconButton } from "@mui/material";
 import Link from "next/link";
@@ -12,7 +12,6 @@ import ButtonComponent from "../button/ButtonComponent";
 
 const EditPeserta = () => {
   const [participant, setParticipant] = useState<ParticipantType | null>(null);
-  // const [noUrut, setNoUrut] = useState("");
   const [namaTimNew, setNamaTimNew] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,25 +24,6 @@ const EditPeserta = () => {
     ? params.eventID[0]
     : params.eventID;
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       setIsLoading(true);
-  //       const participant = await getParticipant(eventID, pesertaID);
-  //       if (participant) {
-  //         setNoUrut(participant.noUrut);
-  //         setNamaTimNew(participant.namaTim);
-  //       } else {
-  //         setError("Peserta tidak ditemukan.");
-  //       }
-  //       setIsLoading(false);
-  //     } catch (error: any) {
-  //       setIsLoading(false);
-  //       setError(error.message);
-  //     }
-  //   };
-  //   fetchData();
-  // }, [eventID, pesertaID]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -75,9 +55,9 @@ const EditPeserta = () => {
     try {
       setIsLoading(true);
       await editParticipant(eventID, pesertaID, namaTimNew);
-      await addAllJuara(eventID);
+      // await addAllJuara(eventID);
       setIsLoading(false);
-      setSuccess("Peserta berhasil ditambahkan!");
+      setSuccess("Peserta berhasil diupdate!");
       setTimeout(() => setSuccess(null), 3000);
       setNamaTimNew(namaTimNew);
     } catch (error: any) {

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import * as XLSX from "xlsx";
-import { addAllJuara, saveNilai } from "@/utils/participant";
+import {saveNilai } from "@/utils/participant";
 import AlertComponent from "../AlertComponent";
 import CircularProgress from "@mui/material/CircularProgress";
 import ButtonComponent from "../button/ButtonComponent";
@@ -167,7 +167,7 @@ const HandleFile: React.FC<HandleFileProps> = ({
           }
         }
         await saveNilai(eventID, pesertaID, nilaiData);
-        await addAllJuara(eventID);
+        // await addAllJuara(eventID);
         setSuccess("Data berhasil disimpan.");
         setTimeout(() => setSuccess(null), 3000);
         setLoadingSave(false);

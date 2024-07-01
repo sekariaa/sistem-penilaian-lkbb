@@ -37,8 +37,7 @@ export const addevent = async (
       createdAt: new Date(),
       updatedAt: new Date(),
     });
-  } catch (error: any) {
-    console.error("Gagal menambahkan event:", error.message);
+  } catch (error) {
     throw new Error("Gagal menambahkan event.");
   }
 };
@@ -79,7 +78,6 @@ export const getEvents = async () => {
           creatorUID,
         });
       });
-      console.log(eventList);
     } else {
       throw new Error("Pengguna tidak ditemukan.");
     }
@@ -116,7 +114,22 @@ export const getEvent = async (eventID: string): Promise<EventType> => {
         throw new Error("Event tidak ditemukan.");
       }
     } else {
-      throw new Error("Pengguna tidak ditemukan.");
+      const q = doc(db, `events/${eventID}`);
+      const docSnap = await getDoc(q);
+
+      if (docSnap.exists()) {
+        const eventData = docSnap.data();
+          return {
+            eventID: docSnap.id,
+            name: eventData.name,
+            organizer: eventData.organizer,
+            level: eventData.level,
+            updatedAt: eventData.updatedAt,
+            createdAt: eventData.createdAt,
+          };
+      } else {
+        throw new Error("Event tidak ditemukan.");
+      }
     }
   } catch (error) {
     throw new Error("Gagal mendapatkan event.");
