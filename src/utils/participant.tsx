@@ -69,6 +69,13 @@ export const addParticipant = async (
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
+
+    //updatedAt event
+    await setDoc(
+      doc(db, `events/${eventId}`),
+      { updatedAt: serverTimestamp() },
+      { merge: true }
+    );
   } catch (error: any) {
     if (error instanceof Error) {
       if (
@@ -218,11 +225,6 @@ export const editParticipant = async (
       { merge: true }
     );
 
-    // await setDoc(
-    //   doc(db, `events/${eventId}`),
-    //   { updatedAt: serverTimestamp() },
-    //   { merge: true }
-    // );
     const pesertaData = pesertaDoc.data();
     if (pesertaData && pesertaData.nilai) {
       // Update event's updatedAt field
@@ -523,15 +525,11 @@ export const getBestPBB = (
     }
   });
 
-  // // Get the top 10 entries
-  const top10 = sortedpbb.slice(0, 3);
+  // // Get the top 3 entries
+  const top3 = sortedpbb.slice(0, 3);
 
-  // // Map the top 10 entries to the required format
-  return top10.map((entry) => [
-    entry.pesertaId,
-    entry.namaTim,
-    entry.nilai.pbb,
-  ]);
+  // // Map the top 3 entries to the required format
+  return top3.map((entry) => [entry.pesertaId, entry.namaTim, entry.nilai.pbb]);
 };
 
 export const getBestDanton = (
@@ -545,81 +543,13 @@ export const getBestDanton = (
     }
   });
 
-  // // Get the top 10 entries
-  const top10 = sortedDanton.slice(0, 3);
+  // // Get the top 3 entries
+  const top3 = sortedDanton.slice(0, 3);
 
-  // // Map the top 10 entries to the required format
-  return top10.map((entry) => [
+  // // Map the top 3 entries to the required format
+  return top3.map((entry) => [
     entry.pesertaId,
     entry.namaTim,
     entry.nilai.danton,
   ]);
 };
-
-//masukkan peringkat, getjuaraumum, getbestvarfor kedalam firestore
-// export const addAllJuara = async (eventId: string) => {
-//   try {
-//     const currentUser = getCurrentUser();
-//     if (!currentUser) {
-//       throw new Error("Pengguna tidak ditemukan.");
-//     }
-
-//     // Get all rankings
-//     const sortedPeserta = await peringkat(eventId);
-
-//     // Check if sortedPeserta is null or empty
-//     if (!sortedPeserta || sortedPeserta.length === 0) {
-//       return;
-//     }
-
-//     // Determine overall winner
-//     const [juaraUmumId, juaraUmumTim, juaraUmumScore] =
-//       getJuaraUmum(sortedPeserta);
-
-//     // Determine best varfor
-//     const bestVarfor = getBestVarfor(sortedPeserta);
-
-//     // Determine best PBB
-//     const bestPBB = getBestPBB(sortedPeserta);
-
-//     // Determine best Danton
-//     const bestDanton = getBestDanton(sortedPeserta);
-
-//     // Create a reference to the event document
-//     const eventDocRef = doc(db, `events/${eventId}`);
-
-//     // Update the event document with the new rankings
-//     await setDoc(
-//       eventDocRef,
-//       {
-//         peringkat: sortedPeserta,
-//         juaraUmum: {
-//           pesertaId: juaraUmumId,
-//           namaTim: juaraUmumTim,
-//           score: juaraUmumScore,
-//         },
-//         bestVarfor: bestVarfor.map(([pesertaId, namaTim, score]) => ({
-//           pesertaId,
-//           namaTim,
-//           score,
-//         })),
-//         bestPBB: bestPBB.map(([pesertaId, namaTim, score]) => ({
-//           pesertaId,
-//           namaTim,
-//           score,
-//         })),
-//         bestDanton: bestDanton.map(([pesertaId, namaTim, score]) => ({
-//           pesertaId,
-//           namaTim,
-//           score,
-//         })),
-//         updatedAt: serverTimestamp(),
-//       },
-//       { merge: true }
-//     );
-//   } catch (error:any) {
-//       throw new Error(
-//         "Gagal menambahkan data juara ke database: " + error.message
-//       );
-//     }
-// };
