@@ -91,7 +91,7 @@ export function SidebarMobile(props: SidebarMobileProps) {
                     className="w-full"
                     onClick={handleSignOut}
                   >
-                    Log Out
+                    Keluar
                   </SidebarButton>
                 </div>
               </DrawerContent>

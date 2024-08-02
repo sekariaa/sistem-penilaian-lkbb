@@ -11,13 +11,25 @@ export interface SidebarItems {
   extras?: ReactNode;
 }
 
-//tipe untuk signin
-export interface Signin {
+/**
+ * tipe untuk proses signin
+ */
+export interface SigninType {
   email: string;
   password: string;
 }
 
-//tipe untuk event
+/**
+ * tipe untuk user yang sudah signin
+ */
+export interface UserType {
+  email: string | null;
+  uid: string;
+}
+
+/**
+ * tipe untuk event
+ */
 export interface EventType {
   eventID: string;
   name: string;
@@ -27,6 +39,9 @@ export interface EventType {
   createdAt: Timestamp;
 }
 
+/**
+ *
+ */
 export interface ParticipantType {
   pesertaID: string;
   noUrut: number;

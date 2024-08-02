@@ -6,7 +6,13 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import {getBestVarfor, getJuaraUmum, peringkat,getBestPBB,getBestDanton, } from "@/utils/participant";
+import {
+  getBestVarfor,
+  getJuaraUmum,
+  peringkat,
+  getBestPBB,
+  getBestDanton,
+} from "@/utils/participant";
 import { getEvent } from "@/utils/event";
 import { useParams } from "next/navigation";
 import { LinearProgress } from "@mui/material";

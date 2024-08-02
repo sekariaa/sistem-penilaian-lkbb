@@ -8,8 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui-sidebar/Popover";
 import { Button } from "../ui-sidebar/Button";
 import { LogOut, MoreHorizontal, Settings } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { Authentication } from "../../utils/user";
-import { getCurrentUser } from "@/utils/user";
+import { SignOut, getCurrentUser } from "../../utils/user";
 
 interface SidebarDesktopProps {
   sidebarItems: SidebarItems;
@@ -21,7 +20,7 @@ export function SidebarDesktop(props: SidebarDesktopProps) {
 
   const handleSignOut = async () => {
     try {
-      await Authentication().signOut();
+      await SignOut();
     } catch (error) {
       console.error("Error signing out:", error);
     }

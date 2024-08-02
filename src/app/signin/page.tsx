@@ -7,7 +7,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import AlertComponent from "../../components/AlertComponent";
-import { Signin } from "../../types";
+import { SigninType } from "../../types";
 import ButtonComponent from "@/components/button/ButtonComponent";
 import Link from "next/link";
 
@@ -16,26 +16,26 @@ const LoginPage = () => {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<Signin>();
+  } = useForm<SigninType>();
   const [error, setError] = useState<string | null>(null);
   const [showPass, setShowPass] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const onSubmit: SubmitHandler<Signin> = async (data) => {
+  const onSubmit: SubmitHandler<SigninType> = async (data) => {
     setError(null);
     try {
       setIsLoading(true);
-      await SignIn(data.email, data.password);
+      await SignIn(data);
       setIsLoading(false);
       router.push("/");
     } catch (error: any) {
       setIsLoading(false);
-      const err = GetSignInErrorMessage(error.code);
-      setError(err);
+      setError(GetSignInErrorMessage(error.code));
     }
   };
 
+  //mengganti tampilan password antara terlihat atau tersembunyi.
   const toggleShowPass = () => {
     setShowPass((prevShowPass) => !prevShowPass);
   };

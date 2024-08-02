@@ -1,20 +1,28 @@
 import "../services/firebase";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { SigninType, UserType } from "@/types";
 
-export const FirebaseAuth = getAuth();
-
+/**
+ * fungsi dari Firebase untuk melakukan operasi autentikasi, seperti login, logout, dan mendaftar pengguna baru
+ * getAuth menyimpan informasi seperti kredensial pengguna yang saat ini aktif dan token
+ */
 export const Authentication = () => {
-  return FirebaseAuth;
+  return getAuth();
 };
 
-//sign in pengguna
-export const SignIn = async (email: string, password: string) => {
-  await signInWithEmailAndPassword(FirebaseAuth, email, password);
+/**
+ * fungsi untuk signin user
+ */
+export const SignIn = async ({ email, password }: SigninType) => {
+  await signInWithEmailAndPassword(Authentication(), email, password);
 };
 
-//mendapatkan error signin
-export const GetSignInErrorMessage = (code: any) => {
-  switch (code) {
+/**
+ * mendapatkan pesan error berdasarkan kode error firebase
+ * string pertama menandakan input, string kedua menandakan output
+ */
+export const GetSignInErrorMessage = (errorCode: string): string => {
+  switch (errorCode) {
     case "auth/user-not-found":
       return "Email tidak terdaftar";
     case "auth/wrong-password":
@@ -24,20 +32,17 @@ export const GetSignInErrorMessage = (code: any) => {
   }
 };
 
-//sign out pengguna
+/**
+ * fungsi untuk sign out pengguna
+ */
 export const SignOut = async () => {
-  await SignOut();
+  await signOut(Authentication());
 };
 
-//mendapatkan user yang sign in
-export const getCurrentUser = (): {
-  uid: string;
-  email: string | null;
-} | null => {
-  const user = FirebaseAuth.currentUser;
-  if (user !== null) {
-    const { uid, email } = user;
-    return { uid, email };
-  }
-  return null;
+/**
+ * mendapatkan data pengguna yang sedang login
+ */
+export const getCurrentUser = (): UserType | null => {
+  const user = Authentication().currentUser;
+  return user ? { uid: user.uid, email: user.email } : null;
 };
