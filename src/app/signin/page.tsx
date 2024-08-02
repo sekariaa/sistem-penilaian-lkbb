@@ -13,9 +13,9 @@ import Link from "next/link";
 
 const LoginPage = () => {
   const {
-    register,
-    handleSubmit,
-    formState: { errors },
+    register, //fungsi bawaan sehingga react-hook-form dapat mengelola validasi dan penyimpanan nilai inputan
+    handleSubmit, //fungsi bawaam untuk menangani pengiriman formulir
+    formState: { errors }, //fungsi bawaan untuk mengakses kesalahan validasi
   } = useForm<SigninType>();
   const [error, setError] = useState<string | null>(null);
   const [showPass, setShowPass] = useState(false);
@@ -35,7 +35,7 @@ const LoginPage = () => {
     }
   };
 
-  //mengganti tampilan password antara terlihat atau tersembunyi.
+  //mengganti tampilan password antara terlihat atau tersembunyi
   const toggleShowPass = () => {
     setShowPass((prevShowPass) => !prevShowPass);
   };

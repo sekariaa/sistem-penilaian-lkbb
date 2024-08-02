@@ -12,6 +12,7 @@ export const Authentication = () => {
 
 /**
  * fungsi untuk signin user
+ * destructuring
  */
 export const SignIn = async ({ email, password }: SigninType) => {
   await signInWithEmailAndPassword(Authentication(), email, password);
