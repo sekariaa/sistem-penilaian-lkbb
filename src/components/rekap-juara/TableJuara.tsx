@@ -18,59 +18,17 @@ import { useParams } from "next/navigation";
 import * as XLSX from "xlsx-js-style";
 import CircularProgress from "@mui/material/CircularProgress";
 import { LinearProgress } from "@mui/material";
-
-interface Nilai {
-  [key: string]: number;
-}
-
-interface NilaiPeserta {
-  pesertaId: string;
-  nilai: Nilai;
-  namaTim: string;
-  noUrut: number;
-  juara: number;
-}
+import { HasilPemeringkatan } from "@/types";
+import { formatDate } from "@/utils/errorHandling";
 
 interface Event {
   eventName: string;
 }
 
-const formatDate = (date: Date | null): string => {
-  if (!date) return "-"; // Handle null or undefined case
-
-  const months = [
-    "Januari",
-    "Februari",
-    "Maret",
-    "April",
-    "Mei",
-    "Juni",
-    "Juli",
-    "Agustus",
-    "September",
-    "Oktober",
-    "November",
-    "Desember",
-  ];
-
-  const day = date.getDate();
-  const monthIndex = date.getMonth();
-  const year = date.getFullYear();
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const seconds = date.getSeconds();
-
-  // Pad single digit numbers with leading zero
-  const formattedHours = hours.toString().padStart(2, "0");
-  const formattedMinutes = minutes.toString().padStart(2, "0");
-  const formattedSeconds = seconds.toString().padStart(2, "0");
-
-  return `${day} ${months[monthIndex]} ${year} pada ${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
-};
-
 export default function AccessibleTable({ eventName }: Event) {
-  const [nilaiPeserta, setNilaiPeserta] = React.useState<NilaiPeserta[]>([]);
-  const [error, setError] = React.useState<string | null>(null);
+  const [nilaiPeserta, setNilaiPeserta] = React.useState<HasilPemeringkatan[]>(
+    []
+  );
   const [maxJuaraUmum, setMaxJuaraUmum] = React.useState<
     [string | null, string | null, number | null]
   >([null, null, null]);
@@ -83,10 +41,8 @@ export default function AccessibleTable({ eventName }: Event) {
   const [maxBestDanton, setMaxBestDanton] = React.useState<
     [string, string, number][]
   >([]);
-  const params = useParams();
-  const eventID = Array.isArray(params.eventID)
-    ? params.eventID[0]
-    : params.eventID;
+  const params = useParams<{ eventID: string }>();
+  const eventID = params.eventID;
   const [loadingExport, setLoadingExport] = React.useState(false);
   const [loading, setLoading] = React.useState(true);
   const [updatedAt, setUpdatedAt] = React.useState<Date | null>(null);
@@ -95,56 +51,62 @@ export default function AccessibleTable({ eventName }: Event) {
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const juara = await peringkat(eventID);
+        //mengambil data
+        const juara: HasilPemeringkatan[] = await peringkat(eventID);
         const bestVarfor = await getBestVarfor(juara);
         const juaraUmum = await getJuaraUmum(juara);
         const bestPBB = await getBestPBB(juara);
         const bestDanton = await getBestDanton(juara);
-        const updated = (await getEvent(eventID)).updatedAt;
+        const eventData = await getEvent(eventID);
+        if (eventData) {
+          const updated = eventData.updatedAt;
+          if (updated && updated.seconds) {
+            const updatedDate = new Date(updated.seconds * 1000);
+            setUpdatedAt(updatedDate);
+          } else {
+            setUpdatedAt(null);
+          }
+        } else {
+          setUpdatedAt(null);
+        }
 
+        //mengatur state dengan data yang telah diambil
         setNilaiPeserta(juara);
         setMaxJuaraUmum(juaraUmum);
         setMaxVarfor(bestVarfor);
         setMaxBestPBB(bestPBB);
         setMaxBestDanton(bestDanton);
-
-        if (updated && updated.seconds) {
-          const updatedDate = new Date(updated.seconds * 1000);
-          setUpdatedAt(updatedDate);
-        } else {
-          setUpdatedAt(null);
-        }
-      } catch (err) {
-        if (err instanceof Error) {
-          setError(err.message);
-        } else {
-          setError("Gagal mengambil data nilai.");
-        }
+      } catch (error: any) {
+        console.error(error.message);
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [eventID]);
 
-  const getBestDantonValue = (pesertaId: string) => {
-    const value = maxBestDanton.find((danton) => danton[0] === pesertaId)
-      ? maxBestDanton.findIndex((danton) => danton[0] === pesertaId) + 1
+  /**
+   * danton adalah parameter untuk setiap elemen dalam array maxBestDanton
+   * danton[0] adalah ID peserta pada setiap elemen array, sedangkan danton[1] dan danton[2] adalah informasi tambahan (nama tim dan nilai)
+   *
+   */
+  const getBestDantonValue = (pesertaID: string) => {
+    const value = maxBestDanton.find((danton) => danton[0] === pesertaID)
+      ? maxBestDanton.findIndex((danton) => danton[0] === pesertaID) + 1
       : "-";
     return value;
   };
 
-  const getBestPBBValue = (pesertaId: string) => {
-    const value = maxBestPBB.find((pbb) => pbb[0] === pesertaId)
-      ? maxBestPBB.findIndex((pbb) => pbb[0] === pesertaId) + 1
+  const getBestPBBValue = (pesertaID: string) => {
+    const value = maxBestPBB.find((pbb) => pbb[0] === pesertaID)
+      ? maxBestPBB.findIndex((pbb) => pbb[0] === pesertaID) + 1
       : "-";
     return value;
   };
 
-  const getBestVarforValue = (pesertaId: string) => {
-    const value = maxVarfor.find((varfor) => varfor[0] === pesertaId)
-      ? maxVarfor.findIndex((varfor) => varfor[0] === pesertaId) + 1
+  const getBestVarforValue = (pesertaID: string) => {
+    const value = maxVarfor.find((varfor) => varfor[0] === pesertaID)
+      ? maxVarfor.findIndex((varfor) => varfor[0] === pesertaID) + 1
       : "-";
     return value;
   };
@@ -236,9 +198,9 @@ export default function AccessibleTable({ eventName }: Event) {
         "Nilai Varfor": row.nilai["varfor"],
         "Juara Umum": row.nilai["juaraUmum"],
         Juara: row.juara,
-        "Best PBB": getBestPBBValue(row.pesertaId),
-        "Best Danton": getBestDantonValue(row.pesertaId),
-        "Best Varfor": getBestVarforValue(row.pesertaId),
+        "Best PBB": getBestPBBValue(row.pesertaID),
+        "Best Danton": getBestDantonValue(row.pesertaID),
+        "Best Varfor": getBestVarforValue(row.pesertaID),
       };
 
       // Menambahkan border ke semua sel
@@ -250,7 +212,7 @@ export default function AccessibleTable({ eventName }: Event) {
       }
 
       // Menandai baris dengan pbb tertinggi
-      if (maxBestPBB.find((pbb) => pbb[0] === row.pesertaId)) {
+      if (maxBestPBB.find((pbb) => pbb[0] === row.pesertaID)) {
         rowData["Nilai PBB"] = {
           v: row.nilai["pbb"],
           s: {
@@ -260,7 +222,7 @@ export default function AccessibleTable({ eventName }: Event) {
         };
       }
       // Menandai baris dengan danton tertinggi
-      if (maxBestDanton.find((danton) => danton[0] === row.pesertaId)) {
+      if (maxBestDanton.find((danton) => danton[0] === row.pesertaID)) {
         rowData["Nilai Danton"] = {
           v: row.nilai["danton"],
           s: {
@@ -270,7 +232,7 @@ export default function AccessibleTable({ eventName }: Event) {
         };
       }
       // Menandai baris dengan varfor tertinggi
-      if (maxVarfor.find((varfor) => varfor[0] === row.pesertaId)) {
+      if (maxVarfor.find((varfor) => varfor[0] === row.pesertaID)) {
         rowData["Nilai Varfor"] = {
           v: row.nilai["varfor"],
           s: {
@@ -280,7 +242,7 @@ export default function AccessibleTable({ eventName }: Event) {
         };
       }
       // Menandai baris dengan juara umum tertinggi
-      if (row.pesertaId === maxJuaraUmum[0]) {
+      if (row.pesertaID === maxJuaraUmum[0]) {
         rowData["Juara Umum"] = {
           v: row.nilai["juaraUmum"],
           s: {
@@ -372,11 +334,11 @@ export default function AccessibleTable({ eventName }: Event) {
                         cursor: "default",
                       },
                     }}
-                    onMouseEnter={() => setHoveredRow(row.pesertaId)}
+                    onMouseEnter={() => setHoveredRow(row.pesertaID)}
                     onMouseLeave={() => setHoveredRow(null)}
                     style={{
                       backgroundColor:
-                        hoveredRow === row.pesertaId ? "#F0F0F0" : "inherit",
+                        hoveredRow === row.pesertaID ? "#F0F0F0" : "inherit",
                     }}
                   >
                     <TableCell component="th" scope="row" align="center">
@@ -387,7 +349,7 @@ export default function AccessibleTable({ eventName }: Event) {
                       align="center"
                       sx={{
                         backgroundColor: maxBestPBB.find(
-                          (pbb) => pbb[0] === row.pesertaId
+                          (pbb) => pbb[0] === row.pesertaID
                         )
                           ? "#F8F633"
                           : "inherit",
@@ -399,7 +361,7 @@ export default function AccessibleTable({ eventName }: Event) {
                       align="center"
                       sx={{
                         backgroundColor: maxBestDanton.find(
-                          (danton) => danton[0] === row.pesertaId
+                          (danton) => danton[0] === row.pesertaID
                         )
                           ? "#4C9CFF"
                           : "inherit",
@@ -417,7 +379,7 @@ export default function AccessibleTable({ eventName }: Event) {
                       align="center"
                       sx={{
                         backgroundColor: maxVarfor.find(
-                          (varfor) => varfor[0] === row.pesertaId
+                          (varfor) => varfor[0] === row.pesertaID
                         )
                           ? "#F0A537"
                           : "inherit",
@@ -429,7 +391,7 @@ export default function AccessibleTable({ eventName }: Event) {
                       align="center"
                       sx={{
                         backgroundColor:
-                          row.pesertaId === maxJuaraUmum[0]
+                          row.pesertaID === maxJuaraUmum[0]
                             ? "#0CE42A"
                             : "inherit",
                       }}
@@ -438,13 +400,13 @@ export default function AccessibleTable({ eventName }: Event) {
                     </TableCell>
                     <TableCell align="center">{row.juara}</TableCell>
                     <TableCell align="center">
-                      {getBestPBBValue(row.pesertaId)}
+                      {getBestPBBValue(row.pesertaID)}
                     </TableCell>
                     <TableCell align="center">
-                      {getBestDantonValue(row.pesertaId)}
+                      {getBestDantonValue(row.pesertaID)}
                     </TableCell>
                     <TableCell align="center">
-                      {getBestVarforValue(row.pesertaId)}
+                      {getBestVarforValue(row.pesertaID)}
                     </TableCell>
                   </TableRow>
                 ))

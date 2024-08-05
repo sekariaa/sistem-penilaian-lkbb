@@ -21,7 +21,10 @@ const Event = () => {
         setEvents(eventList);
       } catch (error) {
         setLoading(false);
-        console.error("Error fetching events:", error);
+        console.error(
+          "Error fetching event:",
+          error instanceof Error ? error.message : error
+        );
       }
     };
 
@@ -81,13 +84,15 @@ const Event = () => {
         {loading ? (
           <CircularProgress style={{ color: "#151c24" }} />
         ) : filteredEvents.length > 0 ? (
-          <div className="xl:w-full md:w-full grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          <div className="w-full grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredEvents.map((event) => (
               <CardEvent key={event.eventID} event={event} />
             ))}
           </div>
         ) : (
-          <p className="text-center">Tidak ada event yang Anda tambahkan.</p>
+          <p className="text-center text-red-500">
+            Tidak ada event yang Anda tambahkan.
+          </p>
         )}
       </div>
     </section>

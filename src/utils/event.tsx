@@ -1,21 +1,18 @@
 import "../services/firebase";
 import {
   getFirestore,
-  doc,
   collection,
   query,
   where,
   getDocs,
   addDoc,
-  getDoc,
   orderBy,
-  setDoc,
-  Timestamp,
+  serverTimestamp,
 } from "firebase/firestore";
-import { getCurrentUser } from "./user";
 import { EventType } from "../types";
+import { checkEvent, checkUser, handleError } from "./errorHandling";
 
-export const db = getFirestore();
+const db = getFirestore();
 
 export const addevent = async (
   eventName: string,
@@ -23,115 +20,73 @@ export const addevent = async (
   level: string
 ) => {
   try {
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      throw new Error("Pengguna tidak ditemukan.");
-    }
-    const uid = currentUser.uid;
+    //cek user
+    const { uid } = checkUser();
 
     await addDoc(collection(db, `events`), {
       name: eventName,
       organizer: organizer,
       level: level,
       creatorUID: uid,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
     });
   } catch (error) {
-    throw new Error("Gagal menambahkan event.");
+    handleError(error);
   }
 };
 
 //get all event by uid
 export const getEvents = async () => {
   try {
-    const currentUser = getCurrentUser();
-    const eventList: {
-      eventID: string;
-      name: string;
-      organizer: string;
-      level: string;
-      creatorUID: string;
-      createdAt: Timestamp;
-      updatedAt: Timestamp;
-    }[] = [];
+    //cek user
+    const { uid } = checkUser();
+    const eventList: EventType[] = [];
 
-    if (currentUser) {
-      const uid = currentUser.uid;
-      const q = query(
-        collection(db, "events"),
-        where("creatorUID", "==", uid),
-        orderBy("createdAt", "desc")
-      );
-      const querySnapshot = await getDocs(q);
-      querySnapshot.forEach((doc) => {
-        const eventData = doc.data();
-        const { name, createdAt, updatedAt, organizer, level, creatorUID } =
-          eventData;
-        eventList.push({
-          eventID: doc.id,
-          name,
-          organizer,
-          level,
-          createdAt,
-          updatedAt,
-          creatorUID,
-        });
+    const q = query(
+      collection(db, "events"),
+      where("creatorUID", "==", uid),
+      orderBy("createdAt", "desc")
+    );
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      const eventData = doc.data();
+      /**
+       * destructuring
+       */
+      const { name, createdAt, updatedAt, organizer, level } = eventData;
+      eventList.push({
+        eventID: doc.id,
+        name,
+        organizer,
+        level,
+        createdAt,
+        updatedAt,
       });
-    } else {
-      throw new Error("Pengguna tidak ditemukan.");
-    }
+    });
 
     return eventList;
   } catch (error) {
-    throw new Error("Gagal mendapatkan event.");
+    handleError(error);
+    return [];
   }
 };
 
-export const getEvent = async (eventID: string): Promise<EventType> => {
+export const getEvent = async (eventID: string): Promise<EventType | null> => {
   try {
-    const currentUser = getCurrentUser();
-    if (currentUser) {
-      const uid = currentUser.uid;
-      const q = doc(db, `events/${eventID}`);
-      const docSnap = await getDoc(q);
-
-      if (docSnap.exists()) {
-        const eventData = docSnap.data();
-        if (eventData.creatorUID === uid) {
-          return {
-            eventID: docSnap.id,
-            name: eventData.name,
-            organizer: eventData.organizer,
-            level: eventData.level,
-            updatedAt: eventData.updatedAt,
-            createdAt: eventData.createdAt,
-          };
-        } else {
-          throw new Error("Anda tidak diizinkan untuk mengakses event ini.");
-        }
-      } else {
-        throw new Error("Event tidak ditemukan.");
-      }
-    } else {
-      const q = doc(db, `events/${eventID}`);
-      const docSnap = await getDoc(q);
-
-      if (docSnap.exists()) {
-        const eventData = docSnap.data();
-          return {
-            eventID: docSnap.id,
-            name: eventData.name,
-            organizer: eventData.organizer,
-            level: eventData.level,
-            updatedAt: eventData.updatedAt,
-            createdAt: eventData.createdAt,
-          };
-      } else {
-        throw new Error("Event tidak ditemukan.");
-      }
-    }
-  } catch (error) {
-    throw new Error("Gagal mendapatkan event.");
+    //cek event
+    const eventDoc = await checkEvent(eventID);
+    const eventData = eventDoc.data();
+    return {
+      eventID: eventDoc.id,
+      name: eventData.name,
+      organizer: eventData.organizer,
+      level: eventData.level,
+      updatedAt: eventData.updatedAt,
+      createdAt: eventData.createdAt,
+    };
+  } catch (error: any) {
+    handleError(error);
+    return null;
   }
 };

@@ -18,6 +18,9 @@ export function SidebarDesktop(props: SidebarDesktopProps) {
   const pathname = usePathname();
   const user = getCurrentUser();
 
+  /**
+   * menangani proses keluar user dari aplikasi
+   */
   const handleSignOut = async () => {
     try {
       await SignOut();
@@ -26,6 +29,11 @@ export function SidebarDesktop(props: SidebarDesktopProps) {
     }
   };
 
+  /**
+   * menentukan apakah suatu tautan (link) aktif berdasarkan pathname saat ini
+   * jika pathname adalah /home dan linkHref juga /home, maka ekspresi ini akan mengembalikan true
+   * jika pathname adalah /home/about dan linkHref adalah /home, maka pathname.startsWith('/home/') akan mengembalikan true
+   */
   const isActive = (linkHref: string) => {
     return pathname === linkHref || pathname.startsWith(`${linkHref}/`);
   };
@@ -37,6 +45,7 @@ export function SidebarDesktop(props: SidebarDesktopProps) {
           Rekap Pembaris
         </h3>
         <div className="mt-5">
+          {/* ditetapkan pada file Sidebar.tsx */}
           <div className="flex flex-col gap-1 w-full text-black-primary">
             {props.sidebarItems.links.map((link, index) => (
               <Link key={index} href={link.href}>

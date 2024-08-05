@@ -8,6 +8,10 @@ interface SidebarButtonProps extends ButtonProps {
   icon?: LucideIcon | SvgIconComponent;
 }
 
+/**
+ * SidebarButton: untuk membuat tombol sidebar biasa tanpa  menutup sheet
+ * SideBarButtonSheet: untuk membuat tombol ditambah dengan langsung menutup sheet
+ */
 export function SidebarButton({
   icon: Icon,
   className,

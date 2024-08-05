@@ -1,46 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { getNilai } from "@/utils/participant";
 import { LinearProgress } from "@mui/material";
+import { formatDate } from "@/utils/errorHandling";
 
-interface HandleFileProps {
-  eventID: string;
-  pesertaID: string;
-}
-
-const formatDate = (date: Date | null): string => {
-  if (!date) return "-";
-
-  const months = [
-    "Januari",
-    "Februari",
-    "Maret",
-    "April",
-    "Mei",
-    "Juni",
-    "Juli",
-    "Agustus",
-    "September",
-    "Oktober",
-    "November",
-    "Desember",
-  ];
-
-  const day = date.getDate();
-  const monthIndex = date.getMonth();
-  const year = date.getFullYear();
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const seconds = date.getSeconds();
-
-  // Pad single digit numbers with leading zero
-  const formattedHours = hours.toString().padStart(2, "0");
-  const formattedMinutes = minutes.toString().padStart(2, "0");
-  const formattedSeconds = seconds.toString().padStart(2, "0");
-
-  return `${day} ${months[monthIndex]} ${year} pada ${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
-};
-
-const TableNilai: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
+const TableNilai: React.FC<{ eventID: string; pesertaID: string }> = ({
+  eventID,
+  pesertaID,
+}) => {
+  //tipe data TypeScript yang menunjukkan bahwa nilaiData bisa berupa objek dengan pasangan key-value di mana kunci adalah string dan nilainya adalah number, atau null
   const [nilaiData, setNilaiData] = useState<Record<string, number> | null>(
     null
   );
@@ -67,6 +34,7 @@ const TableNilai: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
     fetchData();
   }, [eventID, pesertaID]);
 
+  //keyMapping adalah objek yang memetakan kunci nilai (key) ke deskripsi yang akan ditampilkan di tabel.
   const keyMapping: { [key: string]: string } = {
     pbb: "Nilai PBB",
     danton: "Nilai Danton",
@@ -76,6 +44,7 @@ const TableNilai: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
     peringkat: "Juara Peringkat",
   };
 
+  //array yang menentukan urutan tampilnya kunci nilai dalam tabel.
   const orderedKeys = [
     "pbb",
     "danton",
@@ -89,9 +58,7 @@ const TableNilai: React.FC<HandleFileProps> = ({ eventID, pesertaID }) => {
     <section className="text-black-primary">
       {loading && <LinearProgress color="inherit" />}
       {!loading && (!nilaiData || Object.keys(nilaiData).length === 0) ? (
-        <div className="text-center">
-          Tidak ada data yang ditemukan. Lakukan upload dokumen!
-        </div>
+        <div className="text-center">Lakukan upload dokumen!</div>
       ) : (
         <div>
           <table className="w-full border-collapse border border-gray-300 mb-3">

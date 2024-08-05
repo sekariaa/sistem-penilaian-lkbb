@@ -12,28 +12,26 @@ import ButtonComponent from "../button/ButtonComponent";
 
 const DataNilai = () => {
   const [participant, setParticipant] = useState<ParticipantType | null>(null);
-  const [loading, setLoading] = useState(true);
-  const params = useParams();
-  const eventID = Array.isArray(params.eventID)
-    ? params.eventID[0]
-    : params.eventID;
-  const pesertaID = Array.isArray(params.pesertaID)
-    ? params.pesertaID[0]
-    : params.pesertaID;
+  const [error, setError] = useState<string | null>(null);
+  /**
+   * TypeScript generics untuk menentukan { eventID: string } menunjukkan bahwa params harus memiliki properti eventID yang bertipe string.
+   */
+  const params = useParams<{ eventID: string; pesertaID: string }>();
+  const eventID = params.eventID;
+  const pesertaID = params.pesertaID;
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchEvent = async () => {
       try {
         const data = await getParticipant(eventID, pesertaID);
         setParticipant(data);
-        setLoading(false);
-      } catch (error) {
-        setLoading(false);
-        console.error("Failed to fetch participants:", error);
+      } catch (error: any) {
+        console.error(error.message);
+        setError(error.message);
       }
     };
 
-    fetchData();
+    fetchEvent();
   }, [pesertaID, eventID]);
 
   return (
@@ -44,13 +42,9 @@ const DataNilai = () => {
         </IconButton>
       </Link>
 
-      {loading ? (
-        <div className="flex justify-center py-5">
-          <CircularProgress style={{ color: "#151c24" }} />
-        </div>
-      ) : !eventID || !pesertaID || !participant ? (
-        <p className="text-center">Data tidak ditemukan.</p>
-      ) : (
+      {error ? (
+        <div className="text-center text-red-500">{error}</div>
+      ) : participant ? (
         <div>
           <h1 className="text-center text-3xl font-bold mb-3">Data Nilai</h1>
           <div className="flex flex-col md:flex-row justify-between">
@@ -83,9 +77,13 @@ const DataNilai = () => {
               </Link>
             </div>
           </div>
+          <TableNilai eventID={eventID} pesertaID={pesertaID} />
+        </div>
+      ) : (
+        <div className="text-center">
+          <CircularProgress style={{ color: "#151c24" }} />
         </div>
       )}
-      <TableNilai eventID={eventID} pesertaID={pesertaID} />
     </section>
   );
 };

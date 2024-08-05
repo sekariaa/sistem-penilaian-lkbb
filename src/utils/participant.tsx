@@ -12,447 +12,266 @@ import {
   deleteDoc,
   serverTimestamp,
 } from "firebase/firestore";
-import { getCurrentUser } from "./user";
-import { ParticipantType } from "../types";
+import {
+  ParticipantType,
+  NilaiPeserta,
+  HasilPemeringkatan,
+  Nilai,
+} from "../types";
+import {
+  checkUser,
+  checkEvent,
+  checkParticipant,
+  EVENT_PATH,
+  PARTICIPANTS_PATH,
+  PARTICIPANT_PATH,
+  ErrorMessages,
+  handleError,
+} from "./errorHandling";
 
-export const db = getFirestore();
+const db = getFirestore();
 
-// Definisi interface
-interface Nilai {
-  [key: string]: number;
-}
-
-interface NilaiPeserta {
-  pesertaId: string;
-  nilai: Nilai;
-  namaTim: string;
-  noUrut: number;
-}
-
-interface Peringkat extends NilaiPeserta {
-  juara: number;
-}
-
-//add event by uid+eventId
+//add event by uid+eventID
 export const addParticipant = async (
-  eventId: string,
+  eventID: string,
   noUrut: number,
   namaTim: string
 ) => {
   try {
     //cek user
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      throw new Error("Pengguna tidak ditemukan.");
-    }
-
+    await checkUser();
     //cek event
-    const eventDoc = await getDoc(doc(db, `events/${eventId}`));
-    if (!eventDoc.exists()) {
-      throw new Error("ID event tidak ditemukan.");
-    }
+    await checkEvent(eventID);
 
     //cek no urut unik
     const participantQuery = query(
-      collection(db, `events/${eventId}/participants`),
+      collection(db, PARTICIPANTS_PATH(eventID)),
       where("noUrut", "==", noUrut)
     );
     const participantSnapshot = await getDocs(participantQuery);
     if (!participantSnapshot.empty) {
-      throw new Error("Nomor urut sudah digunakan oleh peserta lain.");
+      throw new Error(ErrorMessages.DuplicateNoUrut);
     }
 
     //tambahkan peserta
-    await addDoc(collection(db, `events/${eventId}/participants`), {
-      noUrut: noUrut,
-      namaTim: namaTim,
+    await addDoc(collection(db, PARTICIPANTS_PATH(eventID)), {
+      noUrut,
+      namaTim,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
 
     //updatedAt event
     await setDoc(
-      doc(db, `events/${eventId}`),
+      doc(db, EVENT_PATH(eventID)),
       { updatedAt: serverTimestamp() },
       { merge: true }
     );
-  } catch (error: any) {
-    if (error instanceof Error) {
-      if (
-        error.message === "Pengguna tidak ditemukan." ||
-        error.message === "ID event tidak ditemukan." ||
-        error.message === "Nomor urut sudah digunakan oleh peserta lain."
-      ) {
-        throw error;
-      }
-    }
-    throw new Error(error.message);
+  } catch (error) {
+    handleError(error);
   }
 };
 
 //get all participants by uid+eventid
-export const getParticipants = async (eventId: string) => {
+export const getParticipants = async (eventID: string) => {
   try {
     const participantList: ParticipantType[] = [];
 
     //cek user
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      throw new Error("Pengguna tidak ditemukan.");
-    }
-    const uid = currentUser.uid;
-
+    await checkUser();
     //cek event
-    const eventDoc = await getDoc(doc(db, `events/${eventId}`));
-    if (!eventDoc.exists()) {
-      throw new Error("ID event tidak ditemukan.");
-    }
+    await checkEvent(eventID);
 
     //ambil data partisipants
-    const q = query(collection(db, `events/${eventId}/participants`));
+    const q = query(collection(db, PARTICIPANTS_PATH(eventID)));
     const querySnapshot = await getDocs(q);
     querySnapshot.forEach((doc) => {
       const participantData = doc.data();
       const { noUrut, namaTim } = participantData;
       participantList.push({
         pesertaID: doc.id,
-        noUrut: noUrut,
-        namaTim: namaTim,
+        noUrut,
+        namaTim,
       });
     });
     return participantList;
   } catch (error) {
-    if (error instanceof Error) {
-      if (
-        error.message === "Pengguna tidak ditemukan." ||
-        error.message === "ID event tidak ditemukan."
-      ) {
-        throw error;
-      }
-    }
-    throw new Error("Gagal mendapatkan data peserta.");
+    handleError(error);
+    return [];
   }
 };
 
 //get single participant by uid dan eventid
 export const getParticipant = async (
-  eventId: string,
-  pesertaId: string
+  eventID: string,
+  pesertaID: string
 ): Promise<ParticipantType> => {
   try {
     //cek user
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      throw new Error("Pengguna tidak ditemukan.");
-    }
-    const uid = currentUser.uid;
-
+    await checkUser();
     //cek event
-    const eventDoc = await getDoc(doc(db, `events/${eventId}`));
-    if (!eventDoc.exists()) {
-      throw new Error("ID event tidak ditemukan.");
-    }
-
-    const q = doc(db, `events/${eventId}/participants/${pesertaId}`);
-
-    const docSnap = await getDoc(q);
-
-    if (!docSnap.exists()) {
-      throw new Error("Event tidak ditemukan.");
-    }
-
-    const participantData = docSnap.data();
-
-    if (!participantData) {
-      throw new Error("Data peserta tidak ditemukan.");
-    }
-
+    await checkEvent(eventID);
+    //cek peserta
+    const participant = await checkParticipant(eventID, pesertaID);
+    const participantData = participant.data();
     return {
-      pesertaID: docSnap.id,
+      pesertaID: participant.id,
       noUrut: participantData.noUrut,
       namaTim: participantData.namaTim,
     };
   } catch (error) {
-    if (error instanceof Error) {
-      if (
-        error.message === "Pengguna tidak ditemukan." ||
-        error.message === "Event tidak ditemukan." ||
-        error.message === "Data peserta tidak ditemukan."
-      ) {
-        throw error;
-      }
-    }
-    throw new Error("Gagal mendapatkan data peserta.");
+    handleError(error);
+    return {
+      pesertaID: "",
+      noUrut: 0,
+      namaTim: "",
+    };
   }
 };
 
 // edit participant
 export const editParticipant = async (
-  eventId: string,
-  pesertaId: string,
+  eventID: string,
+  pesertaID: string,
   newNamaTim: string
 ) => {
   try {
     //cek user
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      throw new Error("Pengguna tidak ditemukan.");
-    }
-
+    await checkUser();
     //cek event
-    const eventDoc = await getDoc(doc(db, `events/${eventId}`));
-    if (!eventDoc.exists()) {
-      throw new Error("ID event tidak ditemukan.");
-    }
-
+    await checkEvent(eventID);
     //cek peserta
-    const pesertaDoc = await getDoc(
-      doc(db, `events/${eventId}/participants/${pesertaId}`)
-    );
-    if (!pesertaDoc.exists()) {
-      throw new Error("ID peserta tidak ditemukan.");
-    }
-
-    const participantRef = doc(
-      db,
-      `events/${eventId}/participants/${pesertaId}`
-    );
-
-    // Perbarui dokumen dengan nama tim yang baru
+    await checkParticipant(eventID, pesertaID);
+    // data yang ada di dokumen tidak akan ditimpa sepenuhnya. hanya field namaTim dan updatedAt yang akan diperbarui, dan field lainnya di dokumen akan tetap utuh
     await setDoc(
-      participantRef,
+      doc(db, PARTICIPANT_PATH(eventID, pesertaID)),
       { namaTim: newNamaTim, updatedAt: serverTimestamp() },
       { merge: true }
     );
-
-    const pesertaData = pesertaDoc.data();
-    if (pesertaData && pesertaData.nilai) {
-      // Update event's updatedAt field
-      await setDoc(
-        doc(db, `events/${eventId}`),
-        { updatedAt: serverTimestamp() },
-        { merge: true }
-      );
-    }
+    //updatedAt event
+    await setDoc(
+      doc(db, EVENT_PATH(eventID)),
+      { updatedAt: serverTimestamp() },
+      { merge: true }
+    );
   } catch (error) {
-    if (error instanceof Error) {
-      if (
-        error.message === "Pengguna tidak ditemukan." ||
-        error.message === "ID event tidak ditemukan." ||
-        error.message === "ID peserta tidak ditemukan."
-      ) {
-        throw error;
-      }
-    }
-    throw new Error("Gagal mengedit data peserta.");
+    handleError(error);
   }
 };
 
 //delete participant by uid, eventid, dan peserta
-export const deleteParticipant = async (eventId: string, pesertaId: string) => {
+export const deleteParticipant = async (eventID: string, pesertaID: string) => {
   try {
     //cek user
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      throw new Error("Pengguna tidak ditemukan.");
-    }
-
+    await checkUser();
     //cek event
-    const eventDoc = await getDoc(doc(db, `events/${eventId}`));
-    if (!eventDoc.exists()) {
-      throw new Error("ID event tidak ditemukan.");
-    }
-
+    await checkEvent(eventID);
+    //cek peserta
+    await checkParticipant(eventID, pesertaID);
     //hapus
-    const pesertaDoc = await getDoc(
-      doc(db, `events/${eventId}/participants/${pesertaId}`)
-    );
-    if (!pesertaDoc.exists()) {
-      throw new Error("ID peserta tidak ditemukan.");
-    }
-
-    const pesertaData = pesertaDoc.data();
-    if (pesertaData && pesertaData.nilai) {
-      // Update event's updatedAt field
-      await setDoc(
-        doc(db, `events/${eventId}`),
-        { updatedAt: serverTimestamp() },
-        { merge: true }
-      );
-    }
-
-    await deleteDoc(doc(db, `events/${eventId}/participants/${pesertaId}`));
-    return "Peserta berhasil dihapus.";
-  } catch (error: any) {
-    if (error instanceof Error) {
-      throw new Error(error.message); // Propagate the error message
-    }
-    throw new Error(error.message);
+    await deleteDoc(doc(db, PARTICIPANT_PATH(eventID, pesertaID)));
+  } catch (error) {
+    handleError(error);
   }
 };
 
 //add nilai participant by uid, eventID, pesertaID
 export const saveNilai = async (
-  eventId: string,
-  pesertaId: string,
-  nilaiData: any
+  eventID: string,
+  pesertaID: string,
+  nilaiData: Nilai
 ) => {
   try {
     //cek user
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      throw new Error("Pengguna tidak ditemukan.");
-    }
-
+    await checkUser();
     //cek event
-    const eventDoc = await getDoc(doc(db, `events/${eventId}`));
-    if (!eventDoc.exists()) {
-      throw new Error("ID event tidak ditemukan.");
-    }
-
+    await checkEvent(eventID);
     //cek peserta
-    const pesertaDoc = await getDoc(
-      doc(db, `events/${eventId}/participants/${pesertaId}`)
-    );
-    if (!pesertaDoc.exists()) {
-      throw new Error("ID peserta tidak ditemukan.");
-    }
+    await checkParticipant(eventID, pesertaID);
+
     const dataToSave = {
       ...nilaiData,
       updatedAt: serverTimestamp(),
     };
 
     // Set nilaiData ke dokumen nilai peserta
-    const docRef = doc(db, `events/${eventId}/participants/${pesertaId}`);
-    await setDoc(docRef, { nilai: dataToSave }, { merge: true });
-
-    // updatedat event
     await setDoc(
-      doc(db, `events/${eventId}`),
+      doc(db, PARTICIPANT_PATH(eventID, pesertaID)),
+      { nilai: dataToSave },
+      { merge: true }
+    );
+
+    //updatedAt event
+    await setDoc(
+      doc(db, EVENT_PATH(eventID)),
       { updatedAt: serverTimestamp() },
       { merge: true }
     );
   } catch (error) {
-    if (error instanceof Error) {
-      if (
-        error.message === "Pengguna tidak ditemukan." ||
-        error.message === "ID event tidak ditemukan." ||
-        error.message === "ID peserta tidak ditemukan."
-      ) {
-        throw error;
-      }
-    }
-    throw new Error("Gagal menambahkan data.");
+    handleError(error);
   }
 };
 
 // Fungsi untuk mendapatkan nilai peserta berdasarkan uid, eventID, pesertaID
-export const getNilai = async (eventId: string, pesertaId: string) => {
+export const getNilai = async (eventID: string, pesertaID: string) => {
   try {
     //cek user
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      throw new Error("Pengguna tidak ditemukan.");
-    }
-
+    await checkUser();
     //cek event
-    const eventDoc = await getDoc(doc(db, `events/${eventId}`));
-    if (!eventDoc.exists()) {
-      throw new Error("ID event tidak ditemukan.");
-    }
-
+    await checkEvent(eventID);
     //cek peserta
-    const pesertaDoc = await getDoc(
-      doc(db, `events/${eventId}/participants/${pesertaId}`)
-    );
-    if (!pesertaDoc.exists()) {
-      throw new Error("ID peserta tidak ditemukan.");
-    }
-    // Dapatkan referensi dokumen
-    const docRef = doc(db, `events/${eventId}/participants/${pesertaId}`);
-
-    // Ambil dokumen dari Firestore
-    const docSnap = await getDoc(docRef);
-
-    if (docSnap.exists()) {
-      const data = docSnap.data();
-      const nilaiData = data.nilai;
-      const updatedAt = data.nilai.updatedAt;
-      return { nilaiData, updatedAt };
-    } else {
-      throw new Error("Tidak ada Data. Lakukan upload dokumen!");
-    }
+    const doc = await checkParticipant(eventID, pesertaID);
+    const data = doc.data();
+    const nilaiData = data.nilai;
+    const updatedAt = data.nilai.updatedAt;
+    return { nilaiData, updatedAt };
   } catch (error) {
-    if (error instanceof Error) {
-      if (
-        error.message === "Pengguna tidak ditemukan." ||
-        error.message === "ID event tidak ditemukan." ||
-        error.message === "ID peserta tidak ditemukan." ||
-        error.message === "Tidak ada Data. Lakukan upload dokumen!"
-      ) {
-        throw error;
-      }
-    }
-    throw new Error("Gagal menambahkan data.");
+    handleError(error);
+    return {};
   }
 };
 
-export const getAllNilai = async (eventId: string): Promise<NilaiPeserta[]> => {
+export const getAllNilai = async (eventID: string): Promise<NilaiPeserta[]> => {
   try {
-    const currentUser = getCurrentUser();
-    if (!currentUser) {
-      throw new Error("Pengguna tidak ditemukan.");
-    }
+    //cek event
+    await checkEvent(eventID);
 
-    const eventDoc = await getDoc(doc(db, `events/${eventId}`));
-    if (!eventDoc.exists()) {
-      throw new Error("ID event tidak ditemukan.");
-    }
-
-    const participantsCollectionRef = collection(
-      db,
-      `events/${eventId}/participants`
-    );
-    const participantsSnapshot = await getDocs(participantsCollectionRef);
-
-    if (participantsSnapshot.empty) {
-      throw new Error("Tidak ada peserta ditemukan.");
-    }
+    const participantsRef = collection(db, PARTICIPANTS_PATH(eventID));
+    const participants = await getDocs(participantsRef);
 
     const allNilai: NilaiPeserta[] = [];
-    participantsSnapshot.forEach((doc) => {
-      const data = doc.data();
+    //melakukan iterasi pada setiap dokumen dalam koleksi peserta.
+    participants.forEach((participant) => {
+      const data = participant.data(); //mengambiul data nya lalu dimasukkan ke array
       if (data.nilai) {
         allNilai.push({
-          pesertaId: doc.id,
+          pesertaID: participant.id,
           nilai: data.nilai,
           namaTim: data.namaTim,
           noUrut: data.noUrut,
         });
       }
     });
-
     return allNilai;
   } catch (error) {
-    if (error instanceof Error) {
-      if (
-        error.message === "Pengguna tidak ditemukan." ||
-        error.message === "ID event tidak ditemukan." ||
-        error.message === "ID peserta tidak ditemukan." ||
-        error.message === "Tidak ada Data."
-      ) {
-        throw error;
-      }
-    }
-    throw new Error("Gagal menambahkan data.");
+    handleError(error);
+    return [];
   }
 };
 
-export const peringkat = async (eventId: string): Promise<Peringkat[]> => {
+export const peringkat = async (
+  eventID: string
+): Promise<HasilPemeringkatan[]> => {
   try {
-    const allNilai: NilaiPeserta[] = await getAllNilai(eventId);
+    const allNilai: NilaiPeserta[] = await getAllNilai(eventID);
 
-    const sortedPeserta: Peringkat[] = allNilai
+    /**
+     * mengurutkan berdasarkan peringkat. semakin tinggi peringkat, semakin tinggi posisi peserta dalam urutan.
+     * jika peringkat sama, mengurutkan berdasarkan pbb
+     * jika pbb juga sama, mengurutkan berdasarkan danton
+     * jika danton juga sama, mengurutkan berdasarkan pengurangan. dalam kasus ini, nilai pengurangan yang lebih rendah akan memiliki posisi lebih tinggi
+     */
+    const sortedPeserta: HasilPemeringkatan[] = allNilai
       .sort((a, b) => {
         if (a.nilai.peringkat !== b.nilai.peringkat) {
           return b.nilai.peringkat - a.nilai.peringkat;
@@ -465,19 +284,28 @@ export const peringkat = async (eventId: string): Promise<Peringkat[]> => {
         }
       })
       .map((peserta, index) => ({
-        ...peserta,
+        //setelah pengurutan selesai, map untuk menambahkan properti juara pada setiap objek peserta
+        ...peserta, //menyalin semua properti ke dalam sortedPeserta
         juara: index + 1,
       }));
     return sortedPeserta;
-  } catch (error) {
-    throw new Error("Gagal menghitung peringkat.");
+  } catch (error: any) {
+    throw new Error(error.message);
   }
 };
 
+/**
+ * menentukan pemenang dengan nilai juaraUmum tertinggi dari daftar peserta yang sudah diurutkan
+ */
 export const getJuaraUmum = (
-  sortedPeserta: Peringkat[]
+  sortedPeserta: HasilPemeringkatan[]
 ): [string, string, number] => {
+  //spread operator: membuat salinan dari array
   const sortedJuaraUmum = [...sortedPeserta].sort((a, b) => {
+    /**
+     * jika nilai juaraUmum dari peserta a berbeda dari peserta b, maka pengurutan dilakukan berdasarkan nilai juaraUmum tertinggi di atas
+     * jika nilai juaraUmum dari peserta a dan b sama, pengurutan dilakukan berdasarkan urutan juara
+     */
     if (a.nilai.juaraUmum !== b.nilai.juaraUmum) {
       return b.nilai.juaraUmum - a.nilai.juaraUmum;
     } else {
@@ -486,14 +314,14 @@ export const getJuaraUmum = (
   });
 
   return [
-    sortedJuaraUmum[0].pesertaId,
+    sortedJuaraUmum[0].pesertaID,
     sortedJuaraUmum[0].namaTim,
     sortedJuaraUmum[0].nilai.juaraUmum,
   ];
 };
 
 export const getBestVarfor = (
-  sortedPeserta: Peringkat[]
+  sortedPeserta: HasilPemeringkatan[]
 ): [string, string, number][] => {
   const sortedVarfor = [...sortedPeserta].sort((a, b) => {
     if (a.nilai.varfor !== b.nilai.varfor) {
@@ -503,19 +331,19 @@ export const getBestVarfor = (
     }
   });
 
-  // // Get the top 10 entries
+  /**
+   * mendapatkan 10 besar varfor
+   */
   const top10 = sortedVarfor.slice(0, 10);
-
-  // // Map the top 10 entries to the required format
   return top10.map((entry) => [
-    entry.pesertaId,
+    entry.pesertaID,
     entry.namaTim,
     entry.nilai.varfor,
   ]);
 };
 
 export const getBestPBB = (
-  sortedPeserta: Peringkat[]
+  sortedPeserta: HasilPemeringkatan[]
 ): [string, string, number][] => {
   const sortedpbb = [...sortedPeserta].sort((a, b) => {
     if (a.nilai.pbb !== b.nilai.pbb) {
@@ -525,15 +353,15 @@ export const getBestPBB = (
     }
   });
 
-  // // Get the top 3 entries
+  /**
+   * mendapatkan 3 besar pbb
+   */
   const top3 = sortedpbb.slice(0, 3);
-
-  // // Map the top 3 entries to the required format
-  return top3.map((entry) => [entry.pesertaId, entry.namaTim, entry.nilai.pbb]);
+  return top3.map((entry) => [entry.pesertaID, entry.namaTim, entry.nilai.pbb]);
 };
 
 export const getBestDanton = (
-  sortedPeserta: Peringkat[]
+  sortedPeserta: HasilPemeringkatan[]
 ): [string, string, number][] => {
   const sortedDanton = [...sortedPeserta].sort((a, b) => {
     if (a.nilai.danton !== b.nilai.danton) {
@@ -543,13 +371,36 @@ export const getBestDanton = (
     }
   });
 
-  // // Get the top 3 entries
+  /**
+   * mendapatkan 3 besar danton
+   */
   const top3 = sortedDanton.slice(0, 3);
-
-  // // Map the top 3 entries to the required format
   return top3.map((entry) => [
-    entry.pesertaId,
+    entry.pesertaID,
     entry.namaTim,
     entry.nilai.danton,
   ]);
 };
+
+/**
+ * array dua dimensi dengan 3 baris, di mana setiap baris adalah array satu dimensi berisi:
+
+danton[0]: ID peserta (misalnya "P1")
+danton[1]: Nama tim
+danton[2]: Nilai
+ */
+
+// const maxBestDanton = [
+//   ['P1', 'Tim A', 90],
+//   ['P3', 'Tim C', 90],
+//   ['P4', 'Tim D', 88],
+// ];
+
+//   const getBestDantonValue = (pesertaID) => {
+//     const value = maxBestDanton.find((danton) => danton[0] === pesertaID)
+//       ? maxBestDanton.findIndex((danton) => danton[0] === pesertaID) + 1
+//       : "-";
+//     return value;
+//   };
+
+//   console.log(getBestDantonValue("P2"))

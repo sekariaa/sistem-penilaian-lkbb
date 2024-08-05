@@ -6,6 +6,9 @@ import { SidebarItems } from "@/types";
 import { useMediaQuery } from "usehooks-ts";
 import { SidebarMobile } from "./SidebarMobile";
 
+/**
+ * menyediakan data yang dibutuhkan untuk item-item sidebar
+ */
 const sidebarItems: SidebarItems = {
   links: [
     { label: "Beranda", href: "/", icon: Home },
@@ -14,6 +17,9 @@ const sidebarItems: SidebarItems = {
 };
 
 export function Sidebar() {
+  /**
+   * mengecek apakah lebar viewport saat ini adalah minimal 640px.
+   */
   const isDesktop = useMediaQuery("(min-width: 640px)", {
     initializeWithValue: false,
   });

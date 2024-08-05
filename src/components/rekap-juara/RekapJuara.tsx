@@ -9,19 +9,13 @@ import TableJuara from "./TableJuara";
 import ButtonComponent from "../button/ButtonComponent";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import AlertComponent from "../AlertComponent";
+import { EventType } from "@/types";
 
 const RekapNilai = () => {
-  const [event, setEvent] = useState<{
-    eventID: string;
-    name: string;
-    organizer: string;
-    level: string;
-  } | null>(null);
+  const [event, setEvent] = useState<EventType | null>(null);
   const [loading, setLoading] = useState(true);
-  const params = useParams();
-  const eventID = Array.isArray(params.eventID)
-    ? params.eventID[0]
-    : params.eventID;
+  const params = useParams<{ eventID: string }>();
+  const eventID = params.eventID;
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -42,18 +36,15 @@ const RekapNilai = () => {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        if (eventID) {
-          const eventDetails = await getEvent(eventID);
-          setEvent(eventDetails);
-        } else {
-          console.error("Evenet ID tidak ditemukan.");
-        }
-      } catch (error) {
-        console.error("Error fetching event:", error);
+        const eventDetails = await getEvent(eventID);
+        setEvent(eventDetails);
+      } catch (error: any) {
+        console.error(error.message);
       } finally {
         setLoading(false);
       }
     };
+
     fetchEvent();
   }, [eventID]);
 
@@ -69,7 +60,7 @@ const RekapNilai = () => {
           <CircularProgress style={{ color: "#151c24" }} />
         </div>
       ) : !event ? (
-        <p className="text-center">Event tidak ditemukan.</p>
+        <p className="text-center text-red-500">Event tidak ditemukan.</p>
       ) : (
         <div>
           <h1 className="text-center text-3xl font-bold mb-3">Rekap Juara</h1>

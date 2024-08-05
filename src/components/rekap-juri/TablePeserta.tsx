@@ -11,10 +11,7 @@ import TableSortLabel from "@mui/material/TableSortLabel";
 import Paper from "@mui/material/Paper";
 import { visuallyHidden } from "@mui/utils";
 import { useParams } from "next/navigation";
-import {
-  getParticipants,
-  deleteParticipant,
-} from "@/utils/participant";
+import { getParticipants, deleteParticipant } from "@/utils/participant";
 import LinearProgress from "@mui/material/LinearProgress";
 import ButtonComponent from "../button/ButtonCRUDComponent";
 import Link from "next/link";
@@ -28,11 +25,11 @@ interface Data {
   lainnya: any;
 }
 
-function createData(participant: ParticipantType): Data {
+function createData({ pesertaID, noUrut, namaTim }: ParticipantType): Data {
   return {
-    pesertaID: participant.pesertaID,
-    noUrut: participant.noUrut,
-    namaTim: participant.namaTim,
+    pesertaID,
+    noUrut,
+    namaTim,
     lainnya: "Lainnya",
   };
 }
@@ -156,45 +153,59 @@ export default function EnhancedTable() {
   const [orderBy, setOrderBy] = React.useState<keyof Data>("noUrut");
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+
   const [participants, setParticipants] = React.useState<Data[]>([]);
   const [loading, setLoading] = React.useState<boolean>(true);
-  const params = useParams();
-  const eventID = Array.isArray(params.eventID)
-    ? params.eventID[0]
-    : params.eventID;
   const [searched, setSearched] = React.useState<string>("");
+
+  /**
+   * TypeScript generics untuk menentukan { eventID: string } menunjukkan bahwa params harus memiliki properti eventID yang bertipe string.
+   */
+  const params = useParams<{ eventID: string }>();
+  const eventID = params.eventID;
 
   React.useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await getParticipants(eventID);
-        setParticipants(data.map((participant) => createData(participant)));
+        setParticipants(data.map(createData));
         setLoading(false);
-      } catch (error) {
+      } catch (error: any) {
         setLoading(false);
-        console.error("Failed to fetch participants:", error);
+        console.error(error.message);
       }
     };
 
     fetchData();
   }, [eventID]);
 
+  /**
+   * menangani permintaan pengurutan kolom pada tabel ketika pengguna mengklik header kolom
+   * property adalah nama kolom yang dipilih oleh pengguna untuk diurutkan
+   */
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
     property: keyof Data
   ) => {
+    //kolom dibawah ini tidak dapat diurutkan
     if (property === "namaTim" || property === "lainnya") {
       return;
     }
     const isAsc = orderBy === property && order === "asc";
     setOrder(isAsc ? "desc" : "asc");
-    setOrderBy(property);
   };
 
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent> | null,
+    newPage: number
+  ) => {
     setPage(newPage);
   };
 
+  /**
+   * event.target.value: nilai yang dipilih oleh pengguna dari dropdown
+   * basis numerik yang digunakan adalah desimal (basis 10)
+   */
   const handleChangeRowsPerPage = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -208,28 +219,33 @@ export default function EnhancedTable() {
       try {
         setLoading(true);
         await deleteParticipant(eventID, pesertaID);
-        // await addAllJuara(eventID);
-        const updatedParticipants = participants.filter(
-          (p) => p.pesertaID !== pesertaID
-        );
-        setParticipants(updatedParticipants);
+        const updatedParticipants = await getParticipants(eventID);
+        setParticipants(updatedParticipants.map(createData));
         setLoading(false);
-      } catch (error) {
+      } catch (error: any) {
         setLoading(false);
-        console.error("Failed to delete participant:", error);
+        console.error(error.message);
       }
     }
   };
 
+  /**
+   * menghasilkan data yang akan ditampilkan di tabel, dengan mempertimbangkan pencarian, pengurutan, dan paginasi.
+   */
   const visibleRows = React.useMemo(() => {
-    const filteredParticipants = participants.filter((row) =>
-      row.namaTim.toLowerCase().includes(searched.toLowerCase())
+    //filter berdasarkan search input
+    const filteredParticipants = participants.filter((participant) =>
+      participant.namaTim.toLowerCase().includes(searched.toLowerCase())
     );
+    //menghitung total jumlah halaman yang diperlukan berdasarkan jumlah peserta yang difilter dan jumlah baris per halaman
     const pageCount = Math.ceil(filteredParticipants.length / rowsPerPage);
+    //mengatur halaman saat ini jika halaman yang ditentukan (page) melebihi jumlah halaman yang tersedia. sehingga dipastikan halaman saat ini tidak melebihi halaman terakhir yang valid.
     const adjustedPage = Math.min(page, pageCount - 1);
+    //mengurutkan array dengan mempertahankan urutan relatif elemen yang dianggap sama oleh fungsi perbandingan
     return stableSort(
       filteredParticipants,
       getComparator(order, orderBy)
+      //mengambil subset dari peserta yang sudah diurutkan berdasarkan halaman saat ini dan jumlah baris per halaman
     ).slice(
       adjustedPage * rowsPerPage,
       adjustedPage * rowsPerPage + rowsPerPage
@@ -325,7 +341,7 @@ export default function EnhancedTable() {
                 : !loading && (
                     <TableRow>
                       <TableCell colSpan={3} align="center">
-                        <p className="text-gray-400">Tidak Ada Data</p>
+                        <p className="text-gray-400">Tidak Ada Data.</p>
                       </TableCell>
                     </TableRow>
                   )}

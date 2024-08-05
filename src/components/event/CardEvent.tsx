@@ -10,7 +10,7 @@ import Link from "next/link";
 import { EventType } from "../../types";
 
 const CardEvent = ({ event }: { event: EventType }) => (
-  <Box sx={{ minWidth: 250 }}>
+  <Box sx={{ minWidth: 200 }}>
     <Card variant="outlined">
       <CardContent className="cursor-default">
         <Typography sx={{ fontSize: 14 }} color="text.secondary" gutterBottom>
@@ -18,7 +18,7 @@ const CardEvent = ({ event }: { event: EventType }) => (
         </Typography>
         <Tooltip title={event.name}>
           <Typography
-            variant="h6"
+            variant="body1"
             component="div"
             sx={{
               overflow: "hidden",
@@ -33,8 +33,8 @@ const CardEvent = ({ event }: { event: EventType }) => (
         </Tooltip>
         <Tooltip title={event.organizer}>
           <Typography
+            variant="body2"
             sx={{
-              mb: 1.5,
               overflow: "hidden",
               textOverflow: "ellipsis",
               display: "-webkit-box",
@@ -48,7 +48,7 @@ const CardEvent = ({ event }: { event: EventType }) => (
         </Tooltip>
         <Tooltip title={event.level}>
           <Typography
-            variant="body2"
+            variant="subtitle2"
             sx={{
               overflow: "hidden",
               textOverflow: "ellipsis",
@@ -56,6 +56,7 @@ const CardEvent = ({ event }: { event: EventType }) => (
               WebkitBoxOrient: "vertical",
               WebkitLineClamp: 1,
             }}
+            color="text.secondary"
           >
             {event.level}
           </Typography>

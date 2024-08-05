@@ -12,26 +12,21 @@ const RekapJuaraLive = () => {
     level: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
-  const params = useParams();
-  const eventID = Array.isArray(params.eventID)
-    ? params.eventID[0]
-    : params.eventID;
+  const params = useParams<{ eventID: string }>();
+  const eventID = params.eventID;
 
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        if (eventID) {
-          const eventDetails = await getEvent(eventID);
-          setEvent(eventDetails);
-        } else {
-          console.error("Event ID tidak ditemukan");
-        }
-      } catch (error) {
-        console.error("Error fetching event:", error);
+        const eventDetails = await getEvent(eventID);
+        setEvent(eventDetails);
+      } catch (error: any) {
+        console.error(error.message);
       } finally {
         setLoading(false);
       }
     };
+
     fetchEvent();
   }, [eventID]);
 
@@ -42,7 +37,7 @@ const RekapJuaraLive = () => {
           <CircularProgress style={{ color: "#151c24" }} />
         </div>
       ) : !event ? (
-        <p className="text-center">Event tidak ditemukan.</p>
+        <p className="text-center text-red-500">Event tidak ditemukan.</p>
       ) : (
         <div className="flex-col items-center justify-center">
           <h1 className="text-center text-3xl font-bold mb-3">Rekap Juara</h1>
@@ -62,7 +57,7 @@ const RekapJuaraLive = () => {
             </div>
             <div className="mb-3"></div>
           </div>
-          <TableJuaraLive eventName={event.name} />
+          <TableJuaraLive />
         </div>
       )}
     </section>

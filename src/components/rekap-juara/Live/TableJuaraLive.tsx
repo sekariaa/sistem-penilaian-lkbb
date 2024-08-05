@@ -16,58 +16,13 @@ import {
 import { getEvent } from "@/utils/event";
 import { useParams } from "next/navigation";
 import { LinearProgress } from "@mui/material";
+import { HasilPemeringkatan } from "@/types";
+import { formatDate } from "@/utils/errorHandling";
 
-interface Nilai {
-  [key: string]: number;
-}
-
-interface NilaiPeserta {
-  pesertaId: string;
-  nilai: Nilai;
-  namaTim: string;
-  noUrut: number;
-  juara: number;
-}
-
-interface Event {
-  eventName: string;
-}
-
-const formatDate = (date: Date | null): string => {
-  if (!date) return "-";
-
-  const months = [
-    "Januari",
-    "Februari",
-    "Maret",
-    "April",
-    "Mei",
-    "Juni",
-    "Juli",
-    "Agustus",
-    "September",
-    "Oktober",
-    "November",
-    "Desember",
-  ];
-
-  const day = date.getDate();
-  const monthIndex = date.getMonth();
-  const year = date.getFullYear();
-  const hours = date.getHours();
-  const minutes = date.getMinutes();
-  const seconds = date.getSeconds();
-
-  // Pad single digit numbers with leading zero
-  const formattedHours = hours.toString().padStart(2, "0");
-  const formattedMinutes = minutes.toString().padStart(2, "0");
-  const formattedSeconds = seconds.toString().padStart(2, "0");
-
-  return `${day} ${months[monthIndex]} ${year} pada ${formattedHours}:${formattedMinutes}:${formattedSeconds}`;
-};
-
-export default function AccessibleTable({ eventName }: Event) {
-  const [nilaiPeserta, setNilaiPeserta] = React.useState<NilaiPeserta[]>([]);
+export default function AccessibleTable() {
+  const [nilaiPeserta, setNilaiPeserta] = React.useState<HasilPemeringkatan[]>(
+    []
+  );
   const [error, setError] = React.useState<string | null>(null);
   const [maxJuaraUmum, setMaxJuaraUmum] = React.useState<
     [string | null, string | null, number | null]
@@ -81,35 +36,38 @@ export default function AccessibleTable({ eventName }: Event) {
   const [maxBestDanton, setMaxBestDanton] = React.useState<
     [string, string, number][]
   >([]);
-  const params = useParams();
-  const eventID = Array.isArray(params.eventID)
-    ? params.eventID[0]
-    : params.eventID;
+  const params = useParams<{ eventID: string }>();
+  const eventID = params.eventID;
   const [loading, setLoading] = React.useState(true);
   const [updatedAt, setUpdatedAt] = React.useState<Date | null>(null);
 
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const juara = await peringkat(eventID);
+        const juara: HasilPemeringkatan[] = await peringkat(eventID);
         const bestVarfor = await getBestVarfor(juara);
         const juaraUmum = await getJuaraUmum(juara);
         const bestPBB = await getBestPBB(juara);
         const bestDanton = await getBestDanton(juara);
-        const updated = (await getEvent(eventID)).updatedAt;
+
+        const eventData = await getEvent(eventID);
+        if (eventData) {
+          const updated = eventData.updatedAt;
+          if (updated && updated.seconds) {
+            const updatedDate = new Date(updated.seconds * 1000);
+            setUpdatedAt(updatedDate);
+          } else {
+            setUpdatedAt(null);
+          }
+        } else {
+          setUpdatedAt(null);
+        }
 
         setNilaiPeserta(juara);
         setMaxJuaraUmum(juaraUmum);
         setMaxVarfor(bestVarfor);
         setMaxBestPBB(bestPBB);
         setMaxBestDanton(bestDanton);
-        if (updated && updated.seconds) {
-          const updatedDate = new Date(updated.seconds * 1000);
-          setUpdatedAt(updatedDate);
-          console.log(updatedDate);
-        } else {
-          setUpdatedAt(null);
-        }
       } catch (err) {
         if (err instanceof Error) {
           setError(err.message);
@@ -124,23 +82,23 @@ export default function AccessibleTable({ eventName }: Event) {
     fetchData();
   }, [eventID]);
 
-  const getBestDantonValue = (pesertaId: string) => {
-    const value = maxBestDanton.find((danton) => danton[0] === pesertaId)
-      ? maxBestDanton.findIndex((danton) => danton[0] === pesertaId) + 1
+  const getBestDantonValue = (pesertaID: string) => {
+    const value = maxBestDanton.find((danton) => danton[0] === pesertaID)
+      ? maxBestDanton.findIndex((danton) => danton[0] === pesertaID) + 1
       : "-";
     return value;
   };
 
-  const getBestPBBValue = (pesertaId: string) => {
-    const value = maxBestPBB.find((pbb) => pbb[0] === pesertaId)
-      ? maxBestPBB.findIndex((pbb) => pbb[0] === pesertaId) + 1
+  const getBestPBBValue = (pesertaID: string) => {
+    const value = maxBestPBB.find((pbb) => pbb[0] === pesertaID)
+      ? maxBestPBB.findIndex((pbb) => pbb[0] === pesertaID) + 1
       : "-";
     return value;
   };
 
-  const getBestVarforValue = (pesertaId: string) => {
-    const value = maxVarfor.find((varfor) => varfor[0] === pesertaId)
-      ? maxVarfor.findIndex((varfor) => varfor[0] === pesertaId) + 1
+  const getBestVarforValue = (pesertaID: string) => {
+    const value = maxVarfor.find((varfor) => varfor[0] === pesertaID)
+      ? maxVarfor.findIndex((varfor) => varfor[0] === pesertaID) + 1
       : "-";
     return value;
   };
@@ -202,7 +160,7 @@ export default function AccessibleTable({ eventName }: Event) {
                       align="center"
                       sx={{
                         backgroundColor: maxBestPBB.find(
-                          (pbb) => pbb[0] === row.pesertaId
+                          (pbb) => pbb[0] === row.pesertaID
                         )
                           ? "#F8F633"
                           : "inherit",
@@ -214,7 +172,7 @@ export default function AccessibleTable({ eventName }: Event) {
                       align="center"
                       sx={{
                         backgroundColor: maxBestDanton.find(
-                          (danton) => danton[0] === row.pesertaId
+                          (danton) => danton[0] === row.pesertaID
                         )
                           ? "#4C9CFF"
                           : "inherit",
@@ -232,7 +190,7 @@ export default function AccessibleTable({ eventName }: Event) {
                       align="center"
                       sx={{
                         backgroundColor: maxVarfor.find(
-                          (varfor) => varfor[0] === row.pesertaId
+                          (varfor) => varfor[0] === row.pesertaID
                         )
                           ? "#F0A537"
                           : "inherit",
@@ -244,7 +202,7 @@ export default function AccessibleTable({ eventName }: Event) {
                       align="center"
                       sx={{
                         backgroundColor:
-                          row.pesertaId === maxJuaraUmum[0]
+                          row.pesertaID === maxJuaraUmum[0]
                             ? "#0CE42A"
                             : "inherit",
                       }}
@@ -253,13 +211,13 @@ export default function AccessibleTable({ eventName }: Event) {
                     </TableCell>
                     <TableCell align="center">{row.juara}</TableCell>
                     <TableCell align="center">
-                      {getBestPBBValue(row.pesertaId)}
+                      {getBestPBBValue(row.pesertaID)}
                     </TableCell>
                     <TableCell align="center">
-                      {getBestDantonValue(row.pesertaId)}
+                      {getBestDantonValue(row.pesertaID)}
                     </TableCell>
                     <TableCell align="center">
-                      {getBestVarforValue(row.pesertaId)}
+                      {getBestVarforValue(row.pesertaID)}
                     </TableCell>
                   </TableRow>
                 ))

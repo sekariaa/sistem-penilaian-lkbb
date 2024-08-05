@@ -15,7 +15,7 @@ import { SidebarButtonSheet as SidebarButton } from "./SidebarButton";
 import { usePathname } from "next/navigation";
 import { Separator } from "../ui-sidebar/Separator";
 import { Drawer, DrawerContent, DrawerTrigger } from "../ui-sidebar/Drawer";
-import { Authentication } from "../../utils/user";
+import { SignOut } from "../../utils/user";
 import { getCurrentUser } from "@/utils/user";
 
 interface SidebarMobileProps {
@@ -26,14 +26,22 @@ export function SidebarMobile(props: SidebarMobileProps) {
   const pathname = usePathname();
   const user = getCurrentUser();
 
+  /**
+   * menangani proses keluar user dari aplikasi
+   */
   const handleSignOut = async () => {
     try {
-      await Authentication().signOut();
+      await SignOut();
     } catch (error) {
       console.error("Error signing out:", error);
     }
   };
 
+  /**
+   * menentukan apakah suatu tautan (link) aktif berdasarkan pathname saat ini
+   * jika pathname adalah /home dan linkHref juga /home, maka ekspresi ini akan mengembalikan true
+   * jika pathname adalah /home/about dan linkHref adalah /home, maka pathname.startsWith('/home/') akan mengembalikan true
+   */
   const isActive = (linkHref: string) => {
     return pathname === linkHref || pathname.startsWith(`${linkHref}/`);
   };
@@ -50,6 +58,7 @@ export function SidebarMobile(props: SidebarMobileProps) {
           <span className="text-lg font-semibold text-foreground mx-3 text-center text-black-primary">
             Rekap Pembaris
           </span>
+          {/* komponen yang menangani logika penutupan sheet */}
           <SheetClose asChild>
             <Button className="h-7 w-7 p-0" variant="ghost">
               <X size={15} />
@@ -57,6 +66,7 @@ export function SidebarMobile(props: SidebarMobileProps) {
           </SheetClose>
         </SheetHeader>
         <div className="h-full">
+          {/* ditetapkan pada file Sidebar.tsx */}
           <div className="mt-5 flex flex-col w-full gap-1">
             {props.sidebarItems.links.map((link, idx) => (
               <Link key={idx} href={link.href}>

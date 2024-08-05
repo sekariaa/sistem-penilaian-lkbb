@@ -14,28 +14,21 @@ import ButtonComponent from "../button/ButtonComponent";
 const RekapNilai = () => {
   const [event, setEvent] = useState<EventType | null>(null);
   const [loading, setLoading] = useState(true);
-  const params = useParams();
-  const eventID = Array.isArray(params.eventID)
-    ? params.eventID[0]
-    : params.eventID;
+  const params = useParams<{ eventID: string }>();
+  const eventID = params.eventID;
 
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        if (eventID) {
-          const eventDetails = await getEvent(eventID);
-          setEvent(eventDetails);
-          setLoading(false);
-        } else {
-          setLoading(false);
-          console.error("Event ID tidak ditemukan");
-        }
-      } catch (error) {
-        console.error("Error fetching event:", error);
+        const eventDetails = await getEvent(eventID);
+        setEvent(eventDetails);
+      } catch (error: any) {
+        console.error(error.message);
       } finally {
         setLoading(false);
       }
     };
+
     fetchEvent();
   }, [eventID]);
 
@@ -52,7 +45,7 @@ const RekapNilai = () => {
           <CircularProgress style={{ color: "#151c24" }} />
         </div>
       ) : !event ? (
-        <p className="text-center text-black-primary">Event tidak ditemukan.</p>
+        <p className="text-center mb-3 text-red-500">Event tidak ditemukan.</p>
       ) : (
         <div className="text-black-primary">
           <h1 className="text-center text-3xl font-bold mb-3">
@@ -101,9 +94,9 @@ const RekapNilai = () => {
               </Link>
             </div>
           </div>
+          <TablePeserta />
         </div>
       )}
-      <TablePeserta />
     </section>
   );
 };

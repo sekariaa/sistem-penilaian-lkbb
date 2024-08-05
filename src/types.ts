@@ -8,7 +8,6 @@ export interface SidebarItems {
     href: string;
     icon?: LucideIcon;
   }>;
-  extras?: ReactNode;
 }
 
 /**
@@ -40,10 +39,38 @@ export interface EventType {
 }
 
 /**
- *
+ * tipe untuk peserta
  */
 export interface ParticipantType {
   pesertaID: string;
   noUrut: number;
   namaTim: string;
+}
+
+/**
+ * tipe untuk nilai
+ */
+export interface Nilai {
+  danton: number;
+  juaraUmum: number;
+  pbb: number;
+  pengurangan: number;
+  peringkat: number;
+  varfor: number;
+}
+
+/**
+ * tipe untuk NilaiPeserta
+ * memperluas ParticipantType dan menambahkan properti nilai yang memiliki tipe Nilai
+ */
+export interface NilaiPeserta extends ParticipantType {
+  nilai: Nilai;
+}
+
+/**
+ * tipe untuk
+ * memperluas NilaiPeserta dan menambahkan properti juara
+ */
+export interface HasilPemeringkatan extends NilaiPeserta {
+  juara: number;
 }
